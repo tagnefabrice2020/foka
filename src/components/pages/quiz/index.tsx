@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddQuestion from "./add";
-import Layout from "../../layout";
 import { styled } from "styled-components";
+import DashboardLayout from "../../dashboadLayout";
+import Topic from "../topic";
+import { usePageContext } from "../../../hooks/usePageContext";
 
 const Question = () => {
-  const [section, setSection] = useState("addQuestion");
+  const { page } = usePageContext();
+
+  useEffect(() => {console.log(page)} )
 
   return (
-    <Layout>
-      <MainSection>{section === "addQuestion" && <AddQuestion />}</MainSection>
-    </Layout>
+    <DashboardLayout>
+      <MainSection>
+        {page === "addQuestion" && <AddQuestion />}
+        {page === "addTopic" && <Topic />}
+      </MainSection>
+    </DashboardLayout>
   );
 };
 

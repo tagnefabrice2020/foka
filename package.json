@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@fontsource/roboto": "^5.0.1",
-    "@hookform/resolvers": "^3.1.0",
+    "@hookform/resolvers": "^3.1.1",
     "babel-plugin-styled-components": "^2.1.4",
     "gatsby": "^5.11.0",
     "gatsby-plugin-image": "^3.11.0",
@@ -29,6 +29,7 @@
     "gatsby-source-filesystem": "^5.11.0",
     "gatsby-transformer-sharp": "^5.11.0",
     "i18next": "^22.5.1",
+    "jwt-decode": "^3.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.44.3",

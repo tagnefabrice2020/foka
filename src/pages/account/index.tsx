@@ -3,17 +3,28 @@ import { Router } from "@reach/router";
 import { graphql } from "gatsby";
 import GuestRoute from "../../components/guestRoute";
 import Question from "../../components/pages/quiz";
+import Login from "../../components/pages/login";
+import Register from "../../components/pages/register";
+import { AuthContextProvider } from "../../context/AuthContext";
+import PrivateRoute from "../../components/privateRoute";
+import { PageContextProvider } from "../../context/PageContext";
 
 const Account = () => {
   return (
-    <>
-      <Router basepath="/account">
-        <GuestRoute path="/questions" component={Question} />
-      </Router>
-      <Router basepath="/:lang/account">
-        <GuestRoute path="/questions" component={Question} />
-      </Router>
-    </>
+    <AuthContextProvider>
+      <PageContextProvider>
+        <Router basepath="/account">
+          <GuestRoute path="/login" component={Login} />
+          <GuestRoute path="/register" component={Register} />
+          <PrivateRoute path="/questions" component={Question} />
+        </Router>
+        <Router basepath="/:lang/account">
+          <GuestRoute path="/login" component={Login} />
+          <GuestRoute path="/register" component={Register} />
+          <PrivateRoute path="/questions" component={Question} />
+        </Router>
+      </PageContextProvider>
+    </AuthContextProvider>
   );
 };
 

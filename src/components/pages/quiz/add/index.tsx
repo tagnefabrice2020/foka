@@ -1,12 +1,67 @@
-import React from "react";
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  useEffect,
+  useRef,
+} from "react";
 import { styled } from "styled-components";
 import { Input } from "../../../input";
 import CheckBox from "../../../customCheckBox";
 import { Button } from "../../../button";
 import Divider from "../../../divider";
 import { TextArea } from "../../../textarea";
+import { Controller, useFieldArray } from "react-hook-form";
+import useFormValidation from "../../../../hooks/useFormValidation";
+import { QuestionSchema } from "../../../../formSchema/questionSchema";
+import ErrorFormMessage from "../../../errors/formMessage";
+
+type AnswerOption = {
+  isAnswer: boolean | undefined;
+  option: string;
+};
 
 const AddQuestion: React.FC = () => {
+  const initialValues = {
+    exam: "",
+    subject: "",
+    question: "",
+    options: [
+      { isAnswer: false, option: "" },
+      { isAnswer: false, option: "" },
+    ],
+    topic: "",
+    topics: [],
+  };
+
+  const radioRefs = useRef<HTMLInputElement[]>([]);
+
+  useEffect(() => {
+    // Access the refs here or perform any other operations
+    // console.log(radioRefs.current);
+  }, []);
+
+  const handleOnSubmit = () => {};
+
+  const resetCheckBoxes = (index?: number) => {
+    radioRefs.current.forEach((el: HTMLInputElement, elIndex: number) => {
+      if (!index && elIndex !== index) {
+        el.checked = false;
+      }
+    });
+  };
+
+  const { control, errors, getValues, setValue, handleSubmit, reset, watch } =
+    useFormValidation(initialValues, QuestionSchema, handleOnSubmit);
+
+  const options = watch("options");
+
+  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
+    {
+      control, // control props comes from useForm (optional: if you are using FormContext)
+      name: "options", // unique name for your Field Array
+    }
+  );
+
   return (
     <div>
       <PageTitleBar>
@@ -39,43 +94,119 @@ const AddQuestion: React.FC = () => {
       </PageMenuContainer>
       <div style={{ padding: "1rem" }}>
         <form
-          onSubmit={() => null}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(handleOnSubmit);
+          }}
           style={{ display: "flex", flexDirection: "column", rowGap: "2.4rem" }}
         >
           <div>
             <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
               Question
             </p>
-            <Input placeholder="Question" />
+            <Controller
+              name="question"
+              control={control}
+              render={({ field: { name } }) => (
+                <Input placeholder="Question" name={name} />
+              )}
+            />
+            {errors.question && (
+              <ErrorFormMessage message={errors.question.message} />
+            )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div
-              style={{
-                display: "flex",
-                columnGap: "0.4rem",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox checked={true} />
-              <Input placeholder="Option" />
+          <div
+            style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
+          >
+            {fields.map((field, idx) => (
               <div
                 style={{
-                  width: "2.5rem",
-                  height: "2.5rem",
                   display: "flex",
+                  columnGap: "0.4rem",
                   alignItems: "center",
-                  justifyContent: "center",
-                  background: "red",
-                  color: "#fff",
-                  fontSize: "1.5rem",
-                  borderRadius: "2px",
-                  cursor: "pointer",
                 }}
+                key={field.id}
               >
-                <i className="bi bi-x"></i>
+                {/* <CheckBox checked={true} /> */}
+                <Controller
+                  control={control}
+                  name={`options.${idx}.isAnswer`}
+                  render={({ field: { onChange, name } }) => {
+                    return (
+                      <Input
+                        name={name}
+                        defaultChecked={options[idx].isAnswer}
+                        style={{ width: "fit-content" }}
+                        type={`checkbox`}
+                        ref={(el: HTMLInputElement) =>
+                          (radioRefs.current[idx] = el)
+                        }
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          const newOptions = options.map(
+                            (a: AnswerOption, index: number) => {
+                              if (index === idx) {
+                                onChange(e.target.checked);
+                                return { ...a, isAnswer: true };
+                              } else {
+                                return { ...a, isAnswer: false };
+                              }
+                            }
+                          );
+
+                          setValue("options", newOptions, {
+                            shouldValidate: true,
+                          });
+                        }}
+                        className="checkBoxRadio"
+                      />
+                    );
+                  }}
+                />
+                <Controller
+                  control={control}
+                  name={`options.${idx}.option`}
+                  render={({ field: { name } }) => (
+                    <Input
+                      name={name}
+                      style={{ padding: "12px", borderRadius: "4px" }}
+                      defaultValue={options[idx].option || ""}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                        setValue(`options.${idx}.option`, e.target.value, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      className={`${
+                        errors.options && errors?.options[idx]?.option
+                          ? "form-error"
+                          : ""
+                      }`}
+                    />
+                  )}
+                />
+                <Button
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1.5rem",
+                    borderRadius: "2px",
+                    cursor: "pointer",
+                    border: "none",
+                  }}
+                  type="button"
+                  className="error"
+                  disabled={options.length <= 2}
+                  onClick={() => {
+                    remove(idx);
+                  }}
+                >
+                  <i className="bi bi-x"></i>
+                </Button>
               </div>
-            </div>
+            ))}
           </div>
 
           <div
@@ -96,6 +227,11 @@ const AddQuestion: React.FC = () => {
                 cursor: "pointer",
                 border: "none",
               }}
+              onClick={() => {
+                append({ isAnswer: false, option: "" });
+              }}
+              type="button"
+              disabled={fields.length === 5}
             >
               <i className="bi bi-plus"></i>
             </Button>
@@ -126,11 +262,15 @@ const AddQuestion: React.FC = () => {
                 display: "flex",
                 justifyContent: "center",
                 columnGap: "0.5rem",
-                marginTop: "2rem"
+                marginTop: "2rem",
               }}
             >
-              <Button $primary>Save</Button>
-              <Button $secondary>Cancel</Button>
+              <Button $primary type="submit">
+                Save
+              </Button>
+              <Button $secondary onClick={() => reset()}>
+                Cancel
+              </Button>
             </div>
           </div>
         </form>

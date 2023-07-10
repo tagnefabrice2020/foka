@@ -6,6 +6,9 @@ export const Button = styled.button<{
 }>`
   cursor: pointer;
   padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   /* The GitHub button is a primary button
    * edit this to target it specifically! */

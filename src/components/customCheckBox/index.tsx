@@ -3,9 +3,10 @@ import { styled } from "styled-components";
 
 type Props = {
   checked: boolean;
+  onClick: () => void
 };
 
-const CheckBox = ({ checked }: Props) => {
+const CheckBox = ({ checked, onClick }: Props) => {
   return <Container>{checked ? <Selected /> : <NotSelected />}</Container>;
 };
 
