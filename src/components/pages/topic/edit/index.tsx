@@ -1,54 +1,84 @@
 import React, { useRef, useState, useEffect } from "react";
 import { styled } from "styled-components";
-import useFormValidation from "../../../hooks/useFormValidation";
-import { TopicSchema, TopicType } from "../../../formSchema/topicSchema";
+import useFormValidation from "../../../../hooks/useFormValidation";
+import { TopicSchema, TopicType } from "../../../../formSchema/topicSchema";
 import { Controller } from "react-hook-form";
-import { Input } from "../../input";
-import ErrorFormMessage from "../../errors/formMessage";
-import { Select } from "../../select";
-import { Button } from "../../button";
-import Divider from "../../divider";
-import Chip from "../../chip";
-import useTopic from "../../../hooks/useTopic";
-import ToastNotification from "../../toast";
+import { Input } from "../../../input";
+import ErrorFormMessage from "../../../errors/formMessage";
+import { Select } from "../../../select";
+import { Button } from "../../../button";
+import Divider from "../../../divider";
+import Chip from "../../../chip";
+import useTopic from "../../../../hooks/useTopic";
+import ToastNotification from "../../../toast";
+import { axiosAuthInstance } from "../../../../settings/axiosSetting";
+import { API_URL } from "../../../../settings/apis";
+import { usePageContext } from "../../../../hooks/usePageContext";
+import { TopicInterface } from "../../../../context/PageContext";
 
-const Topic = () => {
+const EditTopic = () => {
   const initV = {
     name: "",
     description: "",
-    type: "mcq"
+    type: "mcq",
+    tags: [],
   };
 
-  const { createTopic } = useTopic();
+  const { updateTopic } = useTopic();
 
   const tagRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLInputElement>(null);
+  const { selectedTopic } = usePageContext();
+  const [loadingTopic, setLoadingTopic] = useState<boolean>(true);
+
+  const [tags, setTags] = useState<any[]>([]);
 
   const handleOnSubmit = async (formData: TopicType) => {
-    const action = await createTopic(formData);
-    console.log(action);
+    const action = await updateTopic(formData);
+
     if (action) {
-      setTags([]);
-      reset({
-        name: "",
-        description: "",
-        type: "mcq",
-      });
-      if (tagRef.current && tagRef.current.value) {
-        tagRef.current.value = "";
-      }
-      if (nameRef.current && nameRef.current.value) {
-        nameRef.current.value = "";
-      }
-      if (descriptionRef.current && descriptionRef.current.value) {
-        descriptionRef.current.value = "";
-      }
       ToastNotification({ message: "Successfull", type: "success" });
     } else {
       ToastNotification({ message: "Error", type: "error" });
     }
   };
+
+  const getSingleTopic = async () => {
+    setLoadingTopic(true);
+    const response = await axiosAuthInstance.get(
+      API_URL.topics + "/" + selectedTopic?.uuid
+    );
+
+    if (response.status === 200) {
+      const topic: TopicInterface = response.data;
+
+      setValue("name", topic.name || "", { shouldValidate: true });
+      setValue("description", topic.description || "", {
+        shouldValidate: true,
+      });
+      setValue("tags", topic.tags.split(","), { shouldValidate: true });
+      setValue("type", topic.type, { shouldValidate: true });
+      setTags(topic.tags.split(","));
+      console.log(topic);
+      const newTags = topic.tags.split(",").map((e: string, idx) => {
+        let data = {
+          text: e,
+          index: idx,
+        };
+          return data;
+      });
+        setTags([...newTags]);
+    }
+  };
+
+  useEffect(() => {
+    if (loadingTopic) getSingleTopic();
+
+    return () => {
+      setLoadingTopic(false);
+    };
+  }, [selectedTopic]);
 
   const {
     control,
@@ -62,10 +92,9 @@ const Topic = () => {
     clearErrors,
   } = useFormValidation(initV, TopicSchema, handleOnSubmit);
 
-  const [tags, setTags] = useState<string[]>([]);
-
   const addTags = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+      if (e.key === "Enter") {
+          e.preventDefault();
       const inputElement = e.target as HTMLInputElement;
       const data = {
         text: inputElement.value,
@@ -136,6 +165,7 @@ const Topic = () => {
                   name={name}
                   onChange={onChange}
                   ref={nameRef}
+                  defaultValue={getValues().name}
                 />
               )}
             />
@@ -148,8 +178,9 @@ const Topic = () => {
             <Controller
               name="type"
               control={control}
-              render={({ field: { onChange, name } }) => (
-                <Select name={name} onChange={onChange}>
+              defaultValue={getValues().type}
+              render={({ field: { onChange, name, value } }) => (
+                <Select name={name} onChange={onChange} value={value}>
                   <option value={`mcq`}>MCQ</option>
                   <option value={`question_answer`}>Question Answer</option>
                 </Select>
@@ -200,6 +231,7 @@ const Topic = () => {
                   name={name}
                   onChange={onChange}
                   ref={descriptionRef}
+                  defaultValue={getValues().description}
                 />
               )}
             />
@@ -332,4 +364,4 @@ const FeedbackGridElement = styled.div`
   row-gap: 0.5rem;
 `;
 
-export default Topic;
+export default EditTopic;

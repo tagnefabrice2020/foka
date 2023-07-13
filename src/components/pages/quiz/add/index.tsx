@@ -14,6 +14,7 @@ import { Controller, useFieldArray } from "react-hook-form";
 import useFormValidation from "../../../../hooks/useFormValidation";
 import { QuestionSchema } from "../../../../formSchema/questionSchema";
 import ErrorFormMessage from "../../../errors/formMessage";
+import QuizPageHeader from "../../../quizPageHeader";
 
 type AnswerOption = {
   isAnswer: boolean | undefined;
@@ -22,14 +23,11 @@ type AnswerOption = {
 
 const AddQuestion: React.FC = () => {
   const initialValues = {
-    exam: "",
-    subject: "",
     question: "",
     options: [
       { isAnswer: false, option: "" },
       { isAnswer: false, option: "" },
     ],
-    topic: "",
     topics: [],
   };
 
@@ -64,34 +62,7 @@ const AddQuestion: React.FC = () => {
 
   return (
     <div>
-      <PageTitleBar>
-        <IDContainer>
-          <p>1</p>
-        </IDContainer>
-        <IDContainerTitle>
-          <p>Quiz</p>
-        </IDContainerTitle>
-      </PageTitleBar>
-      <PageMenuContainer>
-        <PageMenu>
-          <QuestionType>
-            <p>Mutiple Choice Question</p>
-          </QuestionType>
-          <ActionsContainer>
-            <Action>
-              <p>Questions</p>
-            </Action>
-            <Action>
-              <i className="bi bi-plus"></i>
-            </Action>
-          </ActionsContainer>
-          <QuestionBankTextContainer>
-            <p>Question Bank</p>
-          </QuestionBankTextContainer>
-        </PageMenu>
-
-        {/* form */}
-      </PageMenuContainer>
+      <QuizPageHeader questionNumber="1" />
       <div style={{ padding: "1rem" }}>
         <form
           onSubmit={(e) => {

@@ -10,7 +10,7 @@ import { API_URL } from "../../settings/apis";
 const SideMenu = () => {
   const { t } = useTranslation();
   const { logout } = useLogout();
-  const { setPage } = usePageContext();
+  const { setPage, setSelectedTopic } = usePageContext();
 
   const [loading, setLoading] = useState(true);
   const [topics, setTopics] = useState([]);
@@ -20,7 +20,7 @@ const SideMenu = () => {
     axiosAuthInstance
       .get(API_URL.topics)
       .then((r) => {
-        console.log(r);
+        console.log(r.data);
         setLoading(false);
         setTopics(r.data);
       })
@@ -49,7 +49,6 @@ const SideMenu = () => {
         }}
       >
         {topics.map((topic: any, idx: number) => (
-          // <SideMenuContent>
           <li
             style={{
               display: "flex",
@@ -59,15 +58,36 @@ const SideMenu = () => {
               padding: "0.4rem 0.5rem",
               borderRadius: "3px",
               border: "1px solid #eee",
+              cursor: "pointer",
+              position: "relative",
             }}
             key={idx}
+            onClick={() => {
+              setSelectedTopic(topic);
+              setPage("questionList");
+            }}
           >
-            <p>{topic.name}</p> <span>230</span>
-            <button onClick={() => { console.log('dsds'); setPage("addQuestion");}}>
+            <p>{topic.name}</p>
+            <QuestionCountBadge>{topic.questions_count}</QuestionCountBadge>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedTopic(topic);
+                setPage("editTopic");
+              }}
+            >
+              <i className="bi bi-pencil"></i>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedTopic(topic);
+                setPage("addQuestion");
+              }}
+            >
               <i className="bi bi-plus"></i>
             </button>
           </li>
-          // </SideMenuContent>
         ))}
       </ul>
 
@@ -103,6 +123,18 @@ const SideMenu = () => {
     </SideMenuContainer>
   );
 };
+
+const QuestionCountBadge = styled.span`
+  position: absolute;
+  background: #000;
+  color: #fff;
+  padding: 0.1rem 0.5rem;
+  border-radius: 100px;
+  top: -0.2rem;
+  left: 70%;
+  transform: translate(-50%);
+  font-size: small;
+`;
 
 const SideMenuContainer = styled.aside`
   position: fixed;

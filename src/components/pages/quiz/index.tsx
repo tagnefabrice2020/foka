@@ -4,6 +4,8 @@ import { styled } from "styled-components";
 import DashboardLayout from "../../dashboadLayout";
 import Topic from "../topic";
 import { usePageContext } from "../../../hooks/usePageContext";
+import QuestionList from "./list";
+import EditTopic from "../topic/edit";
 
 const Question = () => {
   const { page } = usePageContext();
@@ -15,6 +17,8 @@ const Question = () => {
       <MainSection>
         {page === "addQuestion" && <AddQuestion />}
         {page === "addTopic" && <Topic />}
+        {page === "questionList" && <QuestionList />}
+        {page === "editTopic"  && <EditTopic />}
       </MainSection>
     </DashboardLayout>
   );

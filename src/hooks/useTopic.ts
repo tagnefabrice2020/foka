@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TopicType } from "../formSchema/topicSchema";
 import { axiosAuthInstance } from "../settings/axiosSetting";
 import { API_URL } from "../settings/apis";
+import { usePageContext } from "./usePageContext";
 
 const useTopic = () => {
   const [loadingAllTopics, setLoadingAllTopics] = useState<boolean>(true);
@@ -10,8 +11,10 @@ const useTopic = () => {
 
   const [loadingSingleTopic, setLoadingSingleTopic] = useState<boolean>(false);
 
-  const [updatingSingleTopic, setupdatingSingleTopic] =
+  const [updatingSingleTopic, setUpdatingSingleTopic] =
     useState<boolean>(false);
+  
+  const { selectedTopic } = usePageContext();
 
   const getAllTopics = async () => {};
 
@@ -34,7 +37,27 @@ const useTopic = () => {
 
   const readSingleTopic = async () => {};
 
-  const updateTopic = async () => {};
+  const updateTopic = async ({
+    name,
+    type,
+    tags,
+    description,
+  }: TopicType) => {
+    let data = { name, type, tags, description };
+    setUpdatingSingleTopic(true);
+
+    return await axiosAuthInstance
+      .patch(API_URL.topics + "/" + selectedTopic?.uuid, data)
+      .then((r) => {
+        console.log(r);
+        setUpdatingSingleTopic(false);
+        return true;
+      })
+      .catch((e) => {
+        setUpdatingSingleTopic(false);
+        return false;
+      });
+  };
 
   const deleteTopic = async () => {};
 
@@ -53,7 +76,7 @@ const useTopic = () => {
     setLoadingAllTopics,
     setCreatingTopic,
     setLoadingSingleTopic,
-    setupdatingSingleTopic,
+    setUpdatingSingleTopic,
   };
 };
 
