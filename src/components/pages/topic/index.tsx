@@ -151,7 +151,7 @@ const Topic = () => {
               render={({ field: { onChange, name } }) => (
                 <Select name={name} onChange={onChange}>
                   <option value={`mcq`}>MCQ</option>
-                  <option value={`question_answer`}>Question Answer</option>
+                  {/* <option value={`question_answer`}>Question Answer</option> */}
                 </Select>
               )}
             />

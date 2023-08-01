@@ -3,5 +3,6 @@ export const API_URL = {
   register: "/register",
   logout: "/logout",
   topics: "/topics",
-  sanctum: "/sanctum/csrf-cookie",
+  questions: "/questions",
+  sanctum: "/sanctum/csrf-cookie"
 };

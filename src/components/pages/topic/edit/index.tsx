@@ -182,7 +182,7 @@ const EditTopic = () => {
               render={({ field: { onChange, name, value } }) => (
                 <Select name={name} onChange={onChange} value={value}>
                   <option value={`mcq`}>MCQ</option>
-                  <option value={`question_answer`}>Question Answer</option>
+                  {/* <option value={`question_answer`} disabled>Question Answer</option> */}
                 </Select>
               )}
             />

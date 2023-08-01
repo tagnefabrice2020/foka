@@ -3,6 +3,7 @@ import React, {
   ChangeEventHandler,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import { styled } from "styled-components";
 import { Input } from "../../../input";
@@ -12,33 +13,89 @@ import Divider from "../../../divider";
 import { TextArea } from "../../../textarea";
 import { Controller, useFieldArray } from "react-hook-form";
 import useFormValidation from "../../../../hooks/useFormValidation";
-import { QuestionSchema } from "../../../../formSchema/questionSchema";
+import { AnswerOption, QuestionSchema } from "../../../../formSchema/questionSchema";
 import ErrorFormMessage from "../../../errors/formMessage";
 import QuizPageHeader from "../../../quizPageHeader";
+import Chip from "../../../chip";
+import { usePageContext } from "../../../../hooks/usePageContext";
+import useQuestion from "../../../../hooks/useQuestion";
 
-type AnswerOption = {
-  isAnswer: boolean | undefined;
-  option: string;
-};
 
 const AddQuestion: React.FC = () => {
+  const { selectedTopic } = usePageContext();
+  const { createQuestion } = useQuestion();
   const initialValues = {
     question: "",
     options: [
       { isAnswer: false, option: "" },
       { isAnswer: false, option: "" },
     ],
-    topics: [],
+    tags: [],
+    topic: selectedTopic?.uuid,
   };
 
   const radioRefs = useRef<HTMLInputElement[]>([]);
 
   useEffect(() => {
-    // Access the refs here or perform any other operations
-    // console.log(radioRefs.current);
-  }, []);
+    console.log(errors)
+  });
+  
 
-  const handleOnSubmit = () => {};
+  const tagRef = useRef<HTMLInputElement>(null);
+
+  const handleOnSubmit = async (formData: any) => {
+    let action = await createQuestion(formData);
+    if (action) {
+      reset();
+      setTags([]);
+    }
+  };
+
+    const [tags, setTags] = useState<string[]>([]);
+
+
+  const addTags = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const inputElement = e.target as HTMLInputElement;
+      const data = {
+        text: inputElement.value,
+        index: tags?.length,
+      };
+
+      setTags((prev: any) => {
+        if (prev.length === 0) {
+          setError("Tags", { type: "required", message: "No tag selected" });
+        } else {
+          clearErrors("tags");
+        }
+        setValue("tags", [
+          ...prev.map((e: any) => e?.text),
+          data.text,
+        ] as unknown as never[]);
+        return [...prev, { ...data }];
+      });
+      setValue("tags", "" as unknown as never[]);
+      if (tagRef.current && tagRef.current.value) {
+        tagRef.current.value = "";
+      }
+    }
+  };
+
+  const removeTags = (index: number) => {
+    const newTags = tags.filter((tag: any) => tag.index !== index);
+
+    setTags((prevTags: any) => {
+      if (newTags.length === 0) {
+        setError("Tags", { type: "required", message: "No tag selected" });
+      } else {
+        setValue("tags", [
+          ...newTags.map((e: any) => e.text),
+        ] as unknown as never[]);
+        clearErrors("tag");
+      }
+      return newTags;
+    });
+  };
 
   const resetCheckBoxes = (index?: number) => {
     radioRefs.current.forEach((el: HTMLInputElement, elIndex: number) => {
@@ -48,7 +105,7 @@ const AddQuestion: React.FC = () => {
     });
   };
 
-  const { control, errors, getValues, setValue, handleSubmit, reset, watch } =
+  const { control, errors, getValues, setValue, handleSubmit, reset, watch, setError, clearErrors } =
     useFormValidation(initialValues, QuestionSchema, handleOnSubmit);
 
   const options = watch("options");
@@ -78,13 +135,44 @@ const AddQuestion: React.FC = () => {
             <Controller
               name="question"
               control={control}
-              render={({ field: { name } }) => (
-                <Input placeholder="Question" name={name} />
+              render={({ field: { onChange, name } }) => (
+                <Input placeholder="Question" name={name} onChange={onChange} />
               )}
             />
             {errors.question && (
               <ErrorFormMessage message={errors.question.message} />
             )}
+          </div>
+
+          <div>
+            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+              Tags
+            </p>
+
+            <Input
+              placeholder="tags"
+              ref={tagRef}
+              onKeyDown={(e: any) => addTags(e)}
+            />
+            <div
+              style={{
+                display: "flex",
+                columnGap: "0.5rem",
+                rowGap: "0.5rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              {tags.map((tag: any, index: number) => {
+                return (
+                  <Chip
+                    key={index}
+                    label={tag?.text}
+                    onDelete={() => removeTags(tag.index)}
+                  />
+                );
+              })}
+            </div>
+            {errors.tags && <ErrorFormMessage message={errors.tags.message} />}
           </div>
 
           <div
@@ -138,21 +226,28 @@ const AddQuestion: React.FC = () => {
                   control={control}
                   name={`options.${idx}.option`}
                   render={({ field: { name } }) => (
-                    <Input
-                      name={name}
-                      style={{ padding: "12px", borderRadius: "4px" }}
-                      defaultValue={options[idx].option || ""}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setValue(`options.${idx}.option`, e.target.value, {
-                          shouldValidate: true,
-                        });
-                      }}
-                      className={`${
-                        errors.options && errors?.options[idx]?.option
-                          ? "form-error"
-                          : ""
-                      }`}
-                    />
+                    <div style={{ width: "100%" }}>
+                      <Input
+                        name={name}
+                        style={{ padding: "12px", borderRadius: "4px" }}
+                        defaultValue={options[idx].option || ""}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          setValue(`options.${idx}.option`, e.target.value, {
+                            shouldValidate: true,
+                          });
+                        }}
+                        className={`${
+                          errors.options && errors?.options[idx]?.option
+                            ? "form-error"
+                            : ""
+                        }`}
+                      />
+                      {errors?.options && errors?.options[idx]?.option && (
+                        <ErrorFormMessage
+                          message={errors?.options[idx].option?.message ?? ""}
+                        />
+                      )}
+                    </div>
                   )}
                 />
                 <Button
@@ -179,7 +274,9 @@ const AddQuestion: React.FC = () => {
               </div>
             ))}
           </div>
-
+          {errors.options && (
+            <ErrorFormMessage message={errors.options.message} />
+          )}
           <div
             style={{
               display: "flex",
