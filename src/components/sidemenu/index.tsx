@@ -7,20 +7,33 @@ import { usePageContext } from "../../hooks/usePageContext";
 import { axiosAuthInstance } from "../../settings/axiosSetting";
 import { API_URL } from "../../settings/apis";
 
+import Badge, { BadgeProps } from "@mui/material/Badge";
+import { styled as Mstyled } from "@mui/material/styles";
+import { Box, IconButton } from "@mui/material";
+import { TopicInterface } from "../../context/PageContext";
+
+const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: 30,
+    top: -2,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: "0 4px",
+  },
+}));
+
 const SideMenu = () => {
   const { t } = useTranslation();
   const { logout } = useLogout();
-  const { setPage, setSelectedTopic } = usePageContext();
+  const { setPage, setSelectedTopic, selectedTopic, page, topics, setTopics } = usePageContext();
 
   const [loading, setLoading] = useState(true);
-  const [topics, setTopics] = useState([]);
+
 
   const loadTopics = () => {
     setLoading(true);
     axiosAuthInstance
       .get(API_URL.topics)
       .then((r) => {
-        console.log(r.data);
         setLoading(false);
         setTopics(r.data);
       })
@@ -38,6 +51,32 @@ const SideMenu = () => {
     };
   }, []);
 
+  useEffect(() => {
+    function getActiveTopic() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const page = urlParams.get("section");
+
+      if (page === "edit-topic" || page === "add-a-question") {
+        let topicUuid = new URLSearchParams(window.location.search)
+          .get("topic")
+          ?.toString();
+
+        if (topicUuid && topicUuid?.length > 0) {
+          if (topics.length > 0) {
+            let topicIndex = topics.findIndex(
+              (topic: TopicInterface) => topic?.uuid === topicUuid
+            );
+
+            if (topicIndex > 0) {
+              setSelectedTopic(topics[topicIndex]);
+            }
+          }
+        }
+      }
+    }
+    getActiveTopic();
+  }, [topics.length]);
+
   return (
     <SideMenuContainer>
       <ul
@@ -49,45 +88,128 @@ const SideMenu = () => {
         }}
       >
         {topics.map((topic: any, idx: number) => (
-          <li
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-              alignItems: "center",
-              padding: "0.4rem 0.5rem",
-              borderRadius: "3px",
-              border: "1px solid #eee",
-              cursor: "pointer",
-              position: "relative",
-            }}
+          <StyledBadge
+            color="secondary"
+            max={100}
+            badgeContent={topic.questions_count}
+            sx={{ width: "100%" }}
             key={idx}
-            onClick={() => {
-              setSelectedTopic(topic);
-              setPage("questionList");
-            }}
           >
-            <p>{topic.name}</p>
-            <QuestionCountBadge>{topic.questions_count}</QuestionCountBadge>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedTopic(topic);
-                setPage("editTopic");
+            <li
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                alignItems: "center",
+                padding: "0.2rem 0.5rem",
+                borderRadius: "3px",
+                border: "1px solid #d0d7de",
+                cursor: "pointer",
+                position: "relative",
               }}
             >
-              <i className="bi bi-pencil"></i>
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedTopic(topic);
-                setPage("addQuestion");
-              }}
-            >
-              <i className="bi bi-plus"></i>
-            </button>
-          </li>
+              <Box
+                className="hide-scroll"
+                sx={{
+                  flexGrow: 1,
+                  position: "relative",
+                  overflowX: "scroll",
+                  "&:hover p": { textDecoration: "underline" },
+                  maxWidth: "7rem",
+                  overflow: "scroll",
+                }}
+                onClick={() => {
+                  setSelectedTopic(topic);
+                  setPage("questionList");
+                }}
+              >
+                <Box
+                  sx={{
+                    minWidth: "20rem",
+                    background:
+                      "linear-gradient(to right, #fff 60%, transparent)",
+                  }}
+                >
+                  <p style={{ fontSize: "0.8rem" }}>{topic.name}</p>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  position: "absolute",
+                  right: 73,
+                  width: "2rem",
+                  height: "100%",
+                  // background: "red",
+                  background: "linear-gradient(to left, #fff 20%, transparent)",
+                  top: 0,
+                }}
+              />
+
+              <Box sx={{ display: "flex", columnGap: "0.5rem" }}>
+                <IconButton
+                  aria-label="edit topic"
+                  sx={{
+                    "&:hover": {
+                      background: "rgb(6, 113, 113)",
+                      color:
+                        selectedTopic?.uuid === topic.uuid &&
+                        page === "editTopic"
+                          ? "aliceblue"
+                          : "black",
+                    },
+                    color:
+                      selectedTopic?.uuid === topic.uuid && page === "editTopic"
+                        ? "aliceblue"
+                        : "black",
+                    background:
+                      selectedTopic?.uuid === topic.uuid && page === "editTopic"
+                        ? "rgb(6, 113, 113)"
+                        : "rgba(0, 0, 0, 0.04)",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedTopic(topic);
+                    setPage("editTopic");
+                  }}
+                >
+                  <i
+                    className="bi bi-pencil"
+                    style={{ fontSize: "0.7rem" }}
+                  ></i>
+                </IconButton>
+                <IconButton
+                  aria-label="add question"
+                  sx={{
+                    "&:hover": {
+                      background: "rgb(6, 113, 113)",
+                      color:
+                        selectedTopic?.uuid === topic.uuid &&
+                        page === "addQuestion"
+                          ? "aliceblue"
+                          : "black",
+                    },
+                    color:
+                      selectedTopic?.uuid === topic.uuid &&
+                      page === "addQuestion"
+                        ? "aliceblue"
+                        : "black",
+                    background:
+                      selectedTopic?.uuid === topic.uuid &&
+                      page === "addQuestion"
+                        ? "rgb(6, 113, 113)"
+                        : "rgba(0, 0, 0, 0.04)",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedTopic(topic);
+                    setPage("addQuestion");
+                  }}
+                >
+                  <i className="bi bi-plus" style={{ fontSize: "0.7rem" }}></i>
+                </IconButton>
+              </Box>
+            </li>
+          </StyledBadge>
         ))}
       </ul>
 

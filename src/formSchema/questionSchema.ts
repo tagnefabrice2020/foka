@@ -27,7 +27,8 @@ export const QuestionSchema = object({
       string()
     )
     .required()
-    .min(1)
+    .min(1),
+  multipleAnswer: boolean().default(false)
 });
 
 export type AnswerOption = {
@@ -39,5 +40,6 @@ export type QuestionType = {
   question: string;
   options: AnswerOption[];
   tags: string[];
-  topic: number
+  topic: number;
+  multipleAnswer: boolean;
 };

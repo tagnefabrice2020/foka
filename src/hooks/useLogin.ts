@@ -20,7 +20,6 @@ const useLogin = () => {
     await axiosInstance
       .post(`${API_URL.login}`, data)
       .then((r) => {
-        console.log(r);
         const cleanedToken = r.data.token.replace(/^b'|'$/g, "");
         axiosInstance.defaults.headers.common[
           "Authorization"

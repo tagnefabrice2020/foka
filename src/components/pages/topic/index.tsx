@@ -27,7 +27,6 @@ const Topic = () => {
 
   const handleOnSubmit = async (formData: TopicType) => {
     const action = await createTopic(formData);
-    console.log(action);
     if (action) {
       setTags([]);
       reset({

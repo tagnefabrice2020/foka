@@ -25,7 +25,6 @@ const useTopic = () => {
     return await axiosAuthInstance
       .post(API_URL.topics, data)
       .then((r) => {
-        console.log(r);
           setCreatingTopic(false);
           return true;
       })
@@ -49,7 +48,6 @@ const useTopic = () => {
     return await axiosAuthInstance
       .patch(API_URL.topics + "/" + selectedTopic?.uuid, data)
       .then((r) => {
-        console.log(r);
         setUpdatingSingleTopic(false);
         return true;
       })

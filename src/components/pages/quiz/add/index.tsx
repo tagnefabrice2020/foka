@@ -13,13 +13,16 @@ import Divider from "../../../divider";
 import { TextArea } from "../../../textarea";
 import { Controller, useFieldArray } from "react-hook-form";
 import useFormValidation from "../../../../hooks/useFormValidation";
-import { AnswerOption, QuestionSchema } from "../../../../formSchema/questionSchema";
+import {
+  AnswerOption,
+  QuestionSchema,
+} from "../../../../formSchema/questionSchema";
 import ErrorFormMessage from "../../../errors/formMessage";
 import QuizPageHeader from "../../../quizPageHeader";
-import Chip from "../../../chip";
+// import Chip from "../../../chip";
 import { usePageContext } from "../../../../hooks/usePageContext";
 import useQuestion from "../../../../hooks/useQuestion";
-
+import { Chip, Typography } from "@mui/material";
 
 const AddQuestion: React.FC = () => {
   const { selectedTopic } = usePageContext();
@@ -32,14 +35,13 @@ const AddQuestion: React.FC = () => {
     ],
     tags: [],
     topic: selectedTopic?.uuid,
+    multipleAnswer: false,
   };
 
-  const radioRefs = useRef<HTMLInputElement[]>([]);
+  const [canStillSelectAnswer, setCanStillSelectAnswer] =
+    useState<boolean>(true);
 
-  useEffect(() => {
-    console.log(errors)
-  });
-  
+  const radioRefs = useRef<HTMLInputElement[]>([]);
 
   const tagRef = useRef<HTMLInputElement>(null);
 
@@ -51,11 +53,11 @@ const AddQuestion: React.FC = () => {
     }
   };
 
-    const [tags, setTags] = useState<string[]>([]);
-
+  const [tags, setTags] = useState<string[]>([]);
 
   const addTags = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       const inputElement = e.target as HTMLInputElement;
       const data = {
         text: inputElement.value,
@@ -63,18 +65,15 @@ const AddQuestion: React.FC = () => {
       };
 
       setTags((prev: any) => {
-        if (prev.length === 0) {
-          setError("Tags", { type: "required", message: "No tag selected" });
-        } else {
-          clearErrors("tags");
-        }
+        clearErrors("tags");
+
         setValue("tags", [
           ...prev.map((e: any) => e?.text),
           data.text,
         ] as unknown as never[]);
         return [...prev, { ...data }];
       });
-      setValue("tags", "" as unknown as never[]);
+
       if (tagRef.current && tagRef.current.value) {
         tagRef.current.value = "";
       }
@@ -86,7 +85,7 @@ const AddQuestion: React.FC = () => {
 
     setTags((prevTags: any) => {
       if (newTags.length === 0) {
-        setError("Tags", { type: "required", message: "No tag selected" });
+        setError("tags", { type: "required", message: "No tag selected" });
       } else {
         setValue("tags", [
           ...newTags.map((e: any) => e.text),
@@ -105,10 +104,31 @@ const AddQuestion: React.FC = () => {
     });
   };
 
-  const { control, errors, getValues, setValue, handleSubmit, reset, watch, setError, clearErrors } =
-    useFormValidation(initialValues, QuestionSchema, handleOnSubmit);
+  const {
+    control,
+    errors,
+    getValues,
+    setValue,
+    handleSubmit,
+    reset,
+    watch,
+    setError,
+    clearErrors,
+  } = useFormValidation(initialValues, QuestionSchema, handleOnSubmit);
 
-  const options = watch("options");
+  let options = watch("options");
+  const multipleAnswer = watch("multipleAnswer");
+  function resetOptions() {
+    const newOptions = options.map((a: AnswerOption) => ({
+      ...a,
+      isAnswer: false,
+    }));
+
+    setValue("options", newOptions);
+  }
+  useEffect(() => {
+    resetOptions();
+  }, [multipleAnswer]);
 
   const { fields, append, prepend, remove, swap, move, insert } = useFieldArray(
     {
@@ -126,12 +146,15 @@ const AddQuestion: React.FC = () => {
             e.preventDefault();
             handleSubmit(handleOnSubmit);
           }}
-          style={{ display: "flex", flexDirection: "column", rowGap: "2.4rem" }}
+          style={{ display: "flex", flexDirection: "column", rowGap: "1.5rem" }}
         >
           <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+            <Typography
+              style={{ color: "rgb(101, 109, 118)" }}
+              variant="caption"
+            >
               Question
-            </p>
+            </Typography>
             <Controller
               name="question"
               control={control}
@@ -145,9 +168,12 @@ const AddQuestion: React.FC = () => {
           </div>
 
           <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+            <Typography
+              style={{ color: "rgb(101, 109, 118)" }}
+              variant="caption"
+            >
               Tags
-            </p>
+            </Typography>
 
             <Input
               placeholder="tags"
@@ -176,101 +202,173 @@ const AddQuestion: React.FC = () => {
           </div>
 
           <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              rowGap: "0.3rem",
+              flexDirection: "column",
+            }}
+          >
+            <Controller
+              control={control}
+              name={`multipleAnswer`}
+              render={({ field: { onChange, name } }) => (
+                <Input
+                  type="checkbox"
+                  className="checkBoxRadio"
+                  style={{ width: "auto", height: "auto" }}
+                  onChange={onChange}
+                  name={name}
+                  disabled={options.length < 4 ? true : false}
+                />
+              )}
+            />
+
+            <Typography
+              style={{ color: "rgb(101, 109, 118)" }}
+              variant="caption"
+            >
+              Multiple Answers?
+            </Typography>
+          </div>
+
+          <div
             style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
           >
             {fields.map((field, idx) => (
-              <div
-                style={{
-                  display: "flex",
-                  columnGap: "0.4rem",
-                  alignItems: "center",
-                }}
-                key={field.id}
-              >
-                {/* <CheckBox checked={true} /> */}
-                <Controller
-                  control={control}
-                  name={`options.${idx}.isAnswer`}
-                  render={({ field: { onChange, name } }) => {
-                    return (
-                      <Input
-                        name={name}
-                        defaultChecked={options[idx].isAnswer}
-                        style={{ width: "fit-content" }}
-                        type={`checkbox`}
-                        ref={(el: HTMLInputElement) =>
-                          (radioRefs.current[idx] = el)
-                        }
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          const newOptions = options.map(
-                            (a: AnswerOption, index: number) => {
-                              if (index === idx) {
-                                onChange(e.target.checked);
-                                return { ...a, isAnswer: true };
-                              } else {
-                                return { ...a, isAnswer: false };
-                              }
-                            }
-                          );
-
-                          setValue("options", newOptions, {
-                            shouldValidate: true,
-                          });
-                        }}
-                        className="checkBoxRadio"
-                      />
-                    );
-                  }}
-                />
-                <Controller
-                  control={control}
-                  name={`options.${idx}.option`}
-                  render={({ field: { name } }) => (
-                    <div style={{ width: "100%" }}>
-                      <Input
-                        name={name}
-                        style={{ padding: "12px", borderRadius: "4px" }}
-                        defaultValue={options[idx].option || ""}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                          setValue(`options.${idx}.option`, e.target.value, {
-                            shouldValidate: true,
-                          });
-                        }}
-                        className={`${
-                          errors.options && errors?.options[idx]?.option
-                            ? "form-error"
-                            : ""
-                        }`}
-                      />
-                      {errors?.options && errors?.options[idx]?.option && (
-                        <ErrorFormMessage
-                          message={errors?.options[idx].option?.message ?? ""}
-                        />
-                      )}
-                    </div>
-                  )}
-                />
-                <Button
+              <div key={field.id}>
+                <div
                   style={{
-                    width: "2.5rem",
-                    height: "2.5rem",
                     display: "flex",
+                    columnGap: "0.4rem",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "1.5rem",
-                    borderRadius: "2px",
-                    cursor: "pointer",
-                    border: "none",
                   }}
-                  type="button"
-                  className="error"
-                  disabled={options.length <= 2}
-                  onClick={() => {
-                    remove(idx);
-                  }}
+                  key={field.id}
                 >
-                  <i className="bi bi-x"></i>
-                </Button>
+                  {/* <CheckBox checked={true} /> */}
+                  <Controller
+                    control={control}
+                    name={`options.${idx}.isAnswer`}
+                    render={({ field: { onChange, name } }) => {
+                      return (
+                        <Input
+                          name={name}
+                          defaultChecked={options[idx].isAnswer}
+                          style={{ width: "fit-content" }}
+                          type={`checkbox`}
+                          disabled={
+                            multipleAnswer &&
+                            !options[idx].isAnswer &&
+                            !canStillSelectAnswer
+                              ? true
+                              : false
+                          }
+                          ref={(el: HTMLInputElement) =>
+                            (radioRefs.current[idx] = el)
+                          }
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            console.log(
+                              options.filter((a) => a.isAnswer === true)
+                            );
+                            const newOptions = options.map(
+                              (a: AnswerOption, index: number) => {
+                                if (!multipleAnswer) {
+                                  console.log("single");
+                                  if (index === idx) {
+                                    onChange(e.target.checked);
+                                    return { ...a, isAnswer: true };
+                                  } else {
+                                    return { ...a, isAnswer: false };
+                                  }
+                                } else {
+                                  if (index === idx) {
+                                    onChange(e.target.checked);
+                                    const { isAnswer } = a;
+
+                                    return {
+                                      ...a,
+                                      isAnswer: !isAnswer ? false : true,
+                                    };
+                                  } else {
+                                    return { ...a };
+                                  }
+                                }
+                              }
+                            );
+                            //  console.log(newOptions);
+                            if (multipleAnswer) {
+                              setCanStillSelectAnswer(
+                                newOptions.filter(
+                                  (a: AnswerOption) => a.isAnswer === true
+                                ).length < 3
+                              );
+                            }
+                            setValue("options", newOptions, {
+                              shouldValidate: true,
+                            });
+                          }}
+                          className="checkBoxRadio"
+                        />
+                      );
+                    }}
+                  />
+                  <Controller
+                    control={control}
+                    name={`options.${idx}.option`}
+                    render={({ field: { name } }) => (
+                      <div style={{ width: "100%" }}>
+                        <Input
+                          name={name}
+                          style={{ padding: "12px" }}
+                          defaultValue={options[idx].option || ""}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            setValue(`options.${idx}.option`, e.target.value, {
+                              shouldValidate: true,
+                            });
+                          }}
+                          className={`${
+                            errors.options && errors?.options[idx]?.option
+                              ? "form-error"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    )}
+                  />
+                  <Button
+                    style={{
+                      width: "2rem",
+                      height: "2rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "1.5rem",
+                      borderRadius: "0.2rem",
+                      cursor: "pointer",
+                      border: "none",
+                      background: "#df1919",
+                      color: "aliceblue",
+                    }}
+                    type="button"
+                    className="error"
+                    disabled={options.length <= 2}
+                    onClick={() => {
+                      if (multipleAnswer) {
+                        resetOptions();
+                      }
+                      remove(idx);
+                    }}
+                  >
+                    <i className="bi bi-x"></i>
+                  </Button>
+                </div>
+                {(errors?.options &&
+                  errors?.options[idx] &&
+                  errors?.options[idx]?.option) && (
+                    <ErrorFormMessage
+                      message={errors?.options[idx]?.option?.message ?? ""}
+                    />
+                  )}
               </div>
             ))}
           </div>
@@ -288,12 +386,14 @@ const AddQuestion: React.FC = () => {
               style={{
                 width: "2.25rem",
                 height: "2.25rem",
-                borderRadius: "2px",
+                borderRadius: "0.2rem",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 cursor: "pointer",
                 border: "none",
+                background: "#20a820",
+                color: "aliceblue",
               }}
               onClick={() => {
                 append({ isAnswer: false, option: "" });
@@ -303,7 +403,7 @@ const AddQuestion: React.FC = () => {
             >
               <i className="bi bi-plus"></i>
             </Button>
-            <p>Add new option</p>
+            <Typography sx={{ fontSize: "1rem" }}>Add new option</Typography>
           </div>
 
           <div>
@@ -311,11 +411,15 @@ const AddQuestion: React.FC = () => {
           </div>
           <FeedBackContainer>
             <FeedbackGridElement>
-              <h4>Correct Feedback</h4>
+              <Typography variant="caption" color="rgb(101, 109, 118)">
+                Correct Feedback
+              </Typography>
               <TextArea style={{ minHeight: "5rem" }}></TextArea>
             </FeedbackGridElement>
             <FeedbackGridElement>
-              <h4>Incorrect Feedback</h4>
+              <Typography variant="caption" color="rgb(101, 109, 118)">
+                Incorrect Feedback
+              </Typography>
               <TextArea style={{ minHeight: "5rem" }}></TextArea>
             </FeedbackGridElement>
           </FeedBackContainer>
@@ -440,6 +544,7 @@ const FeedBackContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   column-gap: 0.8rem;
+  row-gap: 0.8rem;
 `;
 
 const FeedbackGridElement = styled.div`

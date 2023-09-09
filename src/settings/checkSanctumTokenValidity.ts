@@ -1,7 +1,7 @@
 import axios from "axios";
 import { axiosInstance } from "./axiosSetting";
 
-const checkSanctumTokenValidity = async (token: string) => {
+const checkSanctumTokenValidity = async (token: string): Promise<boolean> => {
   try {
     const response = await axiosInstance.get("/user", {
       headers: {

@@ -14,7 +14,7 @@ type Prop = {
 const Layout = ({ children }: Prop) => {
   useEffect(() => {
     async function loadCsrfToken() {
-      await axiosInstance1.get(API_URL.sanctum).then((r) => console.log(r)).catch((e) => null);
+      await axiosInstance1.get(API_URL.sanctum).then((r) => {}).catch((e) => null);
     }
     // loadCsrfToken();
   }, []);

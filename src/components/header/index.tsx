@@ -25,7 +25,7 @@ const NavBarContainer = styled.div`
   width: 100%;
   box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px,
     rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
-  background: white;
+  background: #f5f8fa;
   z-index: 9;
   position: fixed;
   top: 0px;
@@ -38,7 +38,7 @@ const NavBar = styled.div`
   height: 51px;
   padding: 10px;
   position: fixed;
-  background: rgb(255, 255, 255);
+  
   z-index: 1;
   width: 100%;
   left: 50%;

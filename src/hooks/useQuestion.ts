@@ -19,7 +19,7 @@ const useQuestion = () => {
     setIspending(true);
     const data = { question, tags, options, topic };
     let response = await axiosAuthInstance.post(`${API_URL.questions}`, data);
-    console.log(response);
+   
     if (response.status === 200) {
       setIspending(false);
       setError("");

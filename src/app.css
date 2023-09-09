@@ -35,3 +35,14 @@ h3 {
     font-size: 2rem;
     line-height: 1.5;
 }
+
+.hide-scroll {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+
+}
+
+.hide-scroll::-webkit-scrollbar {
+    display: none;
+}

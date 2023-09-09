@@ -33,7 +33,6 @@ const Register = () => {
   );
     const size = 15;
     
-    // useEffect(() => { console.log(errors);  console.log(getValues())});
 
   const { navigate } = useI18next();
 

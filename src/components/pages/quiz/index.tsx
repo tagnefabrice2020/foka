@@ -10,8 +10,6 @@ import EditTopic from "../topic/edit";
 const Question = () => {
   const { page } = usePageContext();
 
-  useEffect(() => {console.log(page)} )
-
   return (
     <DashboardLayout>
       <MainSection>
