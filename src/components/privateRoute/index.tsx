@@ -9,8 +9,6 @@ const PrivateRoute = ({ component: Component, location, ...rest }: any) => {
     loading,
   } = useAuthContext();
 
-  // const {loading} = useIsAuth();
-
   const { dispatch } = useAuthContext();
 
   const { navigate } = useI18next();

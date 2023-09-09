@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import { useIsAuth } from "../hooks/useIsAuth";
+import { axiosAuthInstance } from "../settings/axiosSetting";
 
 type UserType = {
   country_id: number | null | undefined;
@@ -129,7 +130,7 @@ export const AuthContextProvider: FC<Props> = ({ children }) => {
   };
 
   if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
     const user: UserType | null = JSON.parse(
       localStorage.getItem("user") || "null"
     );
@@ -149,27 +150,27 @@ export const AuthContextProvider: FC<Props> = ({ children }) => {
 
   useEffect(() => {
     function f() {
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("token");
-
-        const user: UserType = JSON.parse(
-          (typeof window !== undefined && localStorage.getItem("user")) ||
-            (null as unknown as string)
-        );
-
-        if (user && token && mounted) {
-          // alert("dispatching")
-          dispatch({
-            type: "SUCCESS",
-            payload: { token, user: user },
-          });
+      if (mounted) {
+        let token: string;
+        if (typeof window !== "undefined") {
+          token = localStorage.getItem("token") || "";
         }
-        setLoading(false);
+        axiosAuthInstance
+          .get("/user")
+          .then((r) => {
+            dispatch({
+              type: "SUCCESS",
+              payload: { token, user: r.data },
+            });
+            setLoading(false);
+          })
+          .catch((e) => {
+            dispatch({ type: "LOGOUT" });
+            setLoading(false);
+          });
       }
     }
-
     f();
-
     return () => setMounted(false);
   }, [mounted]);
 

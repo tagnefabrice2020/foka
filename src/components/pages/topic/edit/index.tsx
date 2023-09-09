@@ -8,13 +8,13 @@ import ErrorFormMessage from "../../../errors/formMessage";
 import { Select } from "../../../select";
 import { Button } from "../../../button";
 import Divider from "../../../divider";
-import Chip from "../../../chip";
 import useTopic from "../../../../hooks/useTopic";
 import ToastNotification from "../../../toast";
 import { axiosAuthInstance } from "../../../../settings/axiosSetting";
 import { API_URL } from "../../../../settings/apis";
 import { usePageContext } from "../../../../hooks/usePageContext";
 import { TopicInterface } from "../../../../context/PageContext";
+import { Chip, Typography } from "@mui/material";
 
 const EditTopic = () => {
   const initV = {
@@ -34,51 +34,77 @@ const EditTopic = () => {
 
   const [tags, setTags] = useState<any[]>([]);
 
+  const { topics, setTopics } = usePageContext();
+
   const handleOnSubmit = async (formData: TopicType) => {
     const action = await updateTopic(formData);
 
     if (action) {
       ToastNotification({ message: "Successfull", type: "success" });
-    } else {
-      ToastNotification({ message: "Error", type: "error" });
+      let topicsCopy = topics;
+      let topicIndex = topicsCopy.findIndex(
+        (topic: TopicInterface) => topic.uuid === selectedTopic?.uuid
+      );
+      if (topicIndex > -1) {
+        let newName = formData.name;
+        let newTopic = { ...topicsCopy[topicIndex] };
+        newTopic.name = newName;
+
+        topicsCopy.splice(topicIndex, 1);
+        topicsCopy.splice(topicIndex, 0, newTopic);
+        setTopics([...topicsCopy]);
+      } else {
+        ToastNotification({ message: "Error", type: "error" });
+      }
     }
   };
 
-  const getSingleTopic = async () => {
-    setLoadingTopic(true);
-    const response = await axiosAuthInstance.get(
-      API_URL.topics + "/" + selectedTopic?.uuid
-    );
+  const getSingleTopic = () => {
+    reset();
 
-    if (response.status === 200) {
-      const topic: TopicInterface = response.data;
+    const topicUrlParam: URLSearchParams | boolean =
+      typeof window !== undefined &&
+      new URLSearchParams(window.location.search);
+    let uuid = "";
 
-      setValue("name", topic.name || "", { shouldValidate: true });
-      setValue("description", topic.description || "", {
-        shouldValidate: true,
-      });
-      setValue("tags", topic.tags.split(","), { shouldValidate: true });
-      setValue("type", topic.type, { shouldValidate: true });
-      setTags(topic.tags.split(","));
-      console.log(topic);
-      const newTags = topic.tags.split(",").map((e: string, idx) => {
-        let data = {
-          text: e,
-          index: idx,
-        };
-          return data;
-      });
-        setTags([...newTags]);
+    if (topicUrlParam) {
+      uuid = topicUrlParam.get("topic") || "";
     }
+
+    axiosAuthInstance
+      .get(API_URL.topics + "/" + (selectedTopic?.uuid || uuid))
+      .then((r) => {
+        const topic: TopicInterface = r.data;
+
+        setValue("name", topic.name || "", { shouldValidate: true });
+        setValue("description", topic.description || "", {
+          shouldValidate: true,
+        });
+        setValue("tags", topic.tags.split(","), { shouldValidate: true });
+        setValue("type", topic.type, { shouldValidate: true });
+        setTags(topic.tags.split(","));
+        const newTags = topic.tags.split(",").map((e: string, idx) => {
+          let data = {
+            text: e,
+            index: idx,
+          };
+          return data;
+        });
+        setTags([...newTags]);
+        setLoadingTopic(false);
+      })
+      .catch((e) => {
+        setLoadingTopic(false);
+      });
   };
 
   useEffect(() => {
-    if (loadingTopic) getSingleTopic();
+    getSingleTopic();
 
     return () => {
       setLoadingTopic(false);
     };
-  }, [selectedTopic]);
+  }, [selectedTopic?.uuid, loadingTopic]);
 
   const {
     control,
@@ -93,8 +119,8 @@ const EditTopic = () => {
   } = useFormValidation(initV, TopicSchema, handleOnSubmit);
 
   const addTags = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
-          e.preventDefault();
+    if (e.key === "Enter") {
+      e.preventDefault();
       const inputElement = e.target as HTMLInputElement;
       const data = {
         text: inputElement.value,
@@ -145,119 +171,144 @@ const EditTopic = () => {
       </PageTitleBar>
 
       <div style={{ padding: "1rem" }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(handleOnSubmit);
-          }}
-          style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
-        >
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Name
-            </p>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Input
-                  placeholder="Question"
-                  name={name}
-                  onChange={onChange}
-                  ref={nameRef}
-                  defaultValue={getValues().name}
-                />
-              )}
-            />
-            {errors.name && <ErrorFormMessage message={errors.name.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Type
-            </p>
-            <Controller
-              name="type"
-              control={control}
-              defaultValue={getValues().type}
-              render={({ field: { onChange, name, value } }) => (
-                <Select name={name} onChange={onChange} value={value}>
-                  <option value={`mcq`}>MCQ</option>
-                  {/* <option value={`question_answer`} disabled>Question Answer</option> */}
-                </Select>
-              )}
-            />
-            {errors.type && <ErrorFormMessage message={errors.type.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Tags
-            </p>
-
-            <Input
-              placeholder="tags"
-              ref={tagRef}
-              onKeyDown={(e: any) => addTags(e)}
-            />
-            <div
-              style={{
-                display: "flex",
-                columnGap: "0.5rem",
-                rowGap: "0.5rem",
-                marginTop: "0.5rem",
-              }}
-            >
-              {tags.map((tag: any, index: number) => {
-                return (
-                  <Chip
-                    key={index}
-                    label={tag?.text}
-                    onDelete={() => removeTags(tag.index)}
+        {!loadingTopic && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              // setLoadingTopic(true);
+              handleSubmit(handleOnSubmit);
+            }}
+            style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
+          >
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                textTransform={"uppercase"}
+                variant="caption"
+              >
+                Name
+              </Typography>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    placeholder="Question"
+                    name={name}
+                    onChange={onChange}
+                    ref={nameRef}
+                    value={getValues().name}
                   />
-                );
-              })}
-            </div>
-            {errors.tags && <ErrorFormMessage message={errors.tags.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Description
-            </p>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Input
-                  placeholder="description"
-                  name={name}
-                  onChange={onChange}
-                  ref={descriptionRef}
-                  defaultValue={getValues().description}
-                />
+                )}
+              />
+              {errors.name && (
+                <ErrorFormMessage message={errors.name.message} />
               )}
-            />
-            {errors.description && (
-              <ErrorFormMessage message={errors.description.message} />
-            )}
-          </div>
-          <div>
-            <Divider />
-            <div
-              style={{
-                width: "500px",
-                minWidth: "320px",
-                margin: "0 auto",
-                display: "flex",
-                justifyContent: "center",
-                columnGap: "0.5rem",
-                marginTop: "2rem",
-              }}
-            >
-              <Button $primary type="submit">
-                Save
-              </Button>
             </div>
-          </div>
-        </form>
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                textTransform={"uppercase"}
+                variant="caption"
+              >
+                Type
+              </Typography>
+              <Controller
+                name="type"
+                control={control}
+                defaultValue={getValues().type}
+                render={({ field: { onChange, name, value } }) => (
+                  <Select name={name} onChange={onChange} value={value}>
+                    <option value={`mcq`}>MCQ</option>
+                    {/* <option value={`question_answer`} disabled>Question Answer</option> */}
+                  </Select>
+                )}
+              />
+              {errors.type && (
+                <ErrorFormMessage message={errors.type.message} />
+              )}
+            </div>
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                textTransform={"uppercase"}
+                variant="caption"
+              >
+                Tags
+              </Typography>
+
+              <Input
+                placeholder="tags"
+                ref={tagRef}
+                onKeyDown={(e: any) => addTags(e)}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "0.5rem",
+                  rowGap: "0.5rem",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {tags.map((tag: any, index: number) => {
+                  return (
+                    <Chip
+                      key={index}
+                      label={tag?.text}
+                      onDelete={() => removeTags(tag.index)}
+                    />
+                  );
+                })}
+              </div>
+              {errors.tags && (
+                <ErrorFormMessage message={errors.tags.message} />
+              )}
+            </div>
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                textTransform={"uppercase"}
+                variant="caption"
+              >
+                Description
+              </Typography>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    placeholder="description"
+                    name={name}
+                    onChange={onChange}
+                    ref={descriptionRef}
+                    value={getValues().description}
+                  />
+                )}
+              />
+              {errors.description && (
+                <ErrorFormMessage message={errors.description.message} />
+              )}
+            </div>
+            <div>
+              <Divider />
+              <div
+                style={{
+                  width: "500px",
+                  minWidth: "320px",
+                  margin: "0 auto",
+                  display: "flex",
+                  justifyContent: "center",
+                  columnGap: "0.5rem",
+                  marginTop: "2rem",
+                }}
+              >
+                <Button $primary type="submit">
+                  Save
+                </Button>
+              </div>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -3,12 +3,12 @@ import { AuthContext } from "../context/AuthContext";
 import { PageContext } from "../context/PageContext";
 
 export const usePageContext = () => {
-  const { page, setPage, selectedTopic, setSelectedTopic } =
+  const { page, setPage, selectedTopic, setSelectedTopic, topics, setTopics } =
     useContext(PageContext);
 
   if (!page && !setPage) {
     throw new Error("usePageContext must be inside the AuthPageProvider!");
   }
 
-  return { page, setPage, selectedTopic, setSelectedTopic };
+  return { page, setPage, selectedTopic, setSelectedTopic, topics, setTopics };
 };

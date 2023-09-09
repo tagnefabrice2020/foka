@@ -28,7 +28,6 @@ export const useLogout = () => {
       .post(`${API_URL.logout}`)
       .then((response) => {
         // Handle the successful logout
-        console.log("Logout successful");
         // Perform any additional actions (e.g., redirecting to the login page)
         dispatch({ type: "LOGOUT" });
         navigate("/account/login");

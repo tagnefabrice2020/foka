@@ -12,7 +12,6 @@ export const useIsAuth = () => {
   const isAuthenticated = async () => {
     if (token) {
       let isAuth = await checkSanctumTokenValidity(token);
-      console.log(isAuth);
       if (isAuth) {
         setIsAuth(true);
       }

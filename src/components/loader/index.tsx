@@ -8,8 +8,6 @@ const Loader = (size: number) => {
     width: `${size}px!important`,
   };
     
-    console.log(size);
-    
   if (size) {
     return <div className="loader" style={style}></div>;
   }
