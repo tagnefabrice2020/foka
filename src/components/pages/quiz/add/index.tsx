@@ -140,7 +140,7 @@ const AddQuestion: React.FC = () => {
   return (
     <div>
       <QuizPageHeader questionNumber="1" />
-      <div style={{ padding: "1rem" }}>
+      <div style={{ padding: "1rem", maxWidth: "clamp(59vw, 80vw, 90vw)", margin: "auto" }}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -162,7 +162,7 @@ const AddQuestion: React.FC = () => {
                 <Input placeholder="Question" name={name} onChange={onChange} />
               )}
             />
-            {errors.question && (
+            {errors.question 
               <ErrorFormMessage message={errors.question.message} />
             )}
           </div>

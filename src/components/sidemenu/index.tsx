@@ -149,6 +149,7 @@ const SideMenu = () => {
                 <IconButton
                   aria-label="edit topic"
                   sx={{
+                    flexBasis: "1.825rem",
                     "&:hover": {
                       background: "rgb(6, 113, 113)",
                       color:
@@ -180,6 +181,7 @@ const SideMenu = () => {
                 <IconButton
                   aria-label="add question"
                   sx={{
+                    flexBasis: "1.825rem",
                     "&:hover": {
                       background: "rgb(6, 113, 113)",
                       color:
