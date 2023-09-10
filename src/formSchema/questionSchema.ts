@@ -6,12 +6,12 @@ export const QuestionSchema = object({
     .of(
       object().shape({
         isAnswer: boolean(),
-        option: string().required().min(2),
+        option: string().required().min(1),
       })
     )
     .required()
     .min(2)
-    .max(4)
+    .max(5)
     .test(
       "atLeastOneTrue",
       "At least one option must be marked as true.",
@@ -22,13 +22,10 @@ export const QuestionSchema = object({
         return atLeastOneTrue;
       }
     ),
-  tags: array()
-    .of(
-      string()
-    )
-    .required()
-    .min(1),
-  multipleAnswer: boolean().default(false)
+  tags: array().of(string()).required().min(1),
+  multipleAnswer: boolean().default(false),
+  correctFeedBack: string(),
+  inCorrectFeedBack: string(),
 });
 
 export type AnswerOption = {
@@ -40,6 +37,8 @@ export type QuestionType = {
   question: string;
   options: AnswerOption[];
   tags: string[];
-  topic: number;
+  topic: number | undefined;
   multipleAnswer: boolean;
+  correctFeedBack: string;
+  inCorrectFeedBack: string;
 };

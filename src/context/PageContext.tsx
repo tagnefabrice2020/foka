@@ -58,55 +58,6 @@ export const PageContextProvider: FC<Props> = ({ children }) => {
 
   const [topics, setTopics] = useState<TopicInterface[]>([]);
 
-  useEffect(() => {
-    function updateUrl() {
-      if (page === "addQuestion") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const topic = urlParams.get("topic");
-        appendQueryParameters({
-          params: {
-            section: "add-a-question",
-            topic: selectedTopic?.uuid || (topic as unknown as string),
-          },
-        });
-      } else if (page === "addTopic") {
-        appendQueryParameters({ params: { section: "add-a-topic" } });
-      } else if (page === "questionList") {
-        appendQueryParameters({ params: { section: "question-list" } });
-      } else if (page === "editTopic") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const topic = urlParams.get("topic");
-        appendQueryParameters({
-          params: {
-            section: "edit-topic",
-            topic: selectedTopic?.uuid || (topic as unknown as string),
-          },
-        });
-      }
-    }
-    updateUrl();
-  }, [page, selectedTopic]);
-
-  useEffect(() => {
-    function f() {
-      // Parse the query parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const page = urlParams.get("section");
-
-      if (page === "add-a-question") {
-        setPage("addQuestion");
-      } else if (page === "add-a-topic") {
-        setPage("addTopic");
-      } else if (page === "question-list") {
-        setPage("questionList");
-      } else if (page === "edit-topic") {
-        setPage("editTopic");
-      }
-    }
-
-    f();
-  }, [page]);
-
   return (
     <PageContext.Provider
       value={{

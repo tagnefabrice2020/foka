@@ -18,19 +18,21 @@ const useQuestion = () => {
   }: QuestionType): Promise<boolean> => {
     setIspending(true);
     const data = { question, tags, options, topic };
-    let response = await axiosAuthInstance.post(`${API_URL.questions}`, data);
-   
-    if (response.status === 200) {
-      setIspending(false);
-      setError("");
-      ToastNotification({ message: "Successfull", type: "success" });
-      return true;
-    }
-    setError("Ooops something went wrong!");
-    setIspending(false);
-    ToastNotification({ message: "Successfull", type: "error" });
+    return axiosAuthInstance
+      .post(`${API_URL.questions}`, data)
+      .then((response) => {
+        setIspending(false);
+        setError("");
+        ToastNotification({ message: "Successfull", type: "success" });
+        return true;
+      })
+      .catch((e) => {
+        setError("Ooops something went wrong!");
+        setIspending(false);
+        ToastNotification({ message: "Ooops", type: "error" });
 
-    return false;
+        return false;
+      });
   };
 
   const getQuestionList = async (id: number): Promise<boolean> => {

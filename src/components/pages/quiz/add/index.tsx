@@ -16,27 +16,39 @@ import useFormValidation from "../../../../hooks/useFormValidation";
 import {
   AnswerOption,
   QuestionSchema,
+  QuestionType,
 } from "../../../../formSchema/questionSchema";
 import ErrorFormMessage from "../../../errors/formMessage";
 import QuizPageHeader from "../../../quizPageHeader";
-// import Chip from "../../../chip";
 import { usePageContext } from "../../../../hooks/usePageContext";
 import useQuestion from "../../../../hooks/useQuestion";
 import { Chip, Typography } from "@mui/material";
+import DashboardLayout from "../../../dashboadLayout";
 
-const AddQuestion: React.FC = () => {
+const AddQuestion: React.FC = ({uuid}: any): any => {
+ 
   const { selectedTopic } = usePageContext();
   const { createQuestion } = useQuestion();
   const initialValues = {
     question: "",
+    multipleAnswer: false,
     options: [
       { isAnswer: false, option: "" },
       { isAnswer: false, option: "" },
     ],
     tags: [],
     topic: selectedTopic?.uuid,
-    multipleAnswer: false,
+
+    correctFeedBack: "",
+    inCorrectFeedBack: "",
   };
+
+  useEffect(() => {
+    if (selectedTopic) {
+      // If selectedTopic exists, update the topic field in initialFormValues
+      initialValues.topic = uuid;
+    }
+  }, [uuid]);
 
   const [canStillSelectAnswer, setCanStillSelectAnswer] =
     useState<boolean>(true);
@@ -45,15 +57,30 @@ const AddQuestion: React.FC = () => {
 
   const tagRef = useRef<HTMLInputElement>(null);
 
-  const handleOnSubmit = async (formData: any) => {
-    let action = await createQuestion(formData);
+  const handleOnSubmit = async (formData: QuestionType) => {
+    // Destructure the 'topic' property from formData
+    const { topic, ...rest } = formData;
+    let action;
+    // Check if 'topic' is null or undefined
+    if (topic == null) {
+      (rest as QuestionType).topic = selectedTopic?.id;
+      // Pass 'rest' as the parameter to createQuestion
+      action = await createQuestion(rest as QuestionType);
+    } else {
+      // Pass 'formData' as the parameter to createQuestion
+      action = await createQuestion(formData);
+    }
+
     if (action) {
+      
       reset();
       setTags([]);
     }
   };
 
   const [tags, setTags] = useState<string[]>([]);
+
+  // useEffect(() => {console.log(selectedTopic)})
 
   const addTags = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -138,316 +165,366 @@ const AddQuestion: React.FC = () => {
   );
 
   return (
-    <div>
-      <QuizPageHeader questionNumber="1" />
-      <div style={{ padding: "1rem", maxWidth: "clamp(59vw, 80vw, 90vw)", margin: "auto" }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(handleOnSubmit);
+    <DashboardLayout>
+      <div>
+        <QuizPageHeader questionNumber="1" />
+        <div
+          style={{
+            padding: "1rem",
+            maxWidth: "clamp(59vw, 80vw, 90vw)",
+            margin: "auto",
           }}
-          style={{ display: "flex", flexDirection: "column", rowGap: "1.5rem" }}
         >
-          <div>
-            <Typography
-              style={{ color: "rgb(101, 109, 118)" }}
-              variant="caption"
-            >
-              Question
-            </Typography>
-            <Controller
-              name="question"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Input placeholder="Question" name={name} onChange={onChange} />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(handleOnSubmit);
+            }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              rowGap: "1.5rem",
+            }}
+          >
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                variant="caption"
+              >
+                Question
+              </Typography>
+              <Controller
+                name="question"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    placeholder="Question"
+                    name={name}
+                    onChange={onChange}
+                    value={getValues().question}
+                  />
+                )}
+              />
+              {errors.question && (
+                <ErrorFormMessage message={errors.question.message} />
               )}
-            />
-            {errors.question 
-              <ErrorFormMessage message={errors.question.message} />
-            )}
-          </div>
+            </div>
 
-          <div>
-            <Typography
-              style={{ color: "rgb(101, 109, 118)" }}
-              variant="caption"
-            >
-              Tags
-            </Typography>
+            <div>
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                variant="caption"
+              >
+                Tags
+              </Typography>
 
-            <Input
-              placeholder="tags"
-              ref={tagRef}
-              onKeyDown={(e: any) => addTags(e)}
-            />
+              <Input
+                placeholder="tags"
+                ref={tagRef}
+                onKeyDown={(e: any) => addTags(e)}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "0.5rem",
+                  rowGap: "0.5rem",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {tags.map((tag: any, index: number) => {
+                  return (
+                    <Chip
+                      key={index}
+                      label={tag?.text}
+                      onDelete={() => removeTags(tag.index)}
+                    />
+                  );
+                })}
+              </div>
+              {errors.tags && (
+                <ErrorFormMessage message={errors.tags.message} />
+              )}
+            </div>
+
             <div
               style={{
                 display: "flex",
-                columnGap: "0.5rem",
-                rowGap: "0.5rem",
-                marginTop: "0.5rem",
+                alignItems: "center",
+                rowGap: "0.3rem",
+                flexDirection: "column",
               }}
             >
-              {tags.map((tag: any, index: number) => {
-                return (
-                  <Chip
-                    key={index}
-                    label={tag?.text}
-                    onDelete={() => removeTags(tag.index)}
+              <Controller
+                control={control}
+                name={`multipleAnswer`}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    type="checkbox"
+                    className="checkBoxRadio"
+                    style={{ width: "auto", height: "auto" }}
+                    onChange={onChange}
+                    checked={getValues().multipleAnswer || false}
+                    name={name}
+                    disabled={options.length < 4 ? true : false}
                   />
-                );
-              })}
+                )}
+              />
+
+              <Typography
+                style={{ color: "rgb(101, 109, 118)" }}
+                variant="caption"
+              >
+                Multiple Answers?
+              </Typography>
             </div>
-            {errors.tags && <ErrorFormMessage message={errors.tags.message} />}
-          </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              rowGap: "0.3rem",
-              flexDirection: "column",
-            }}
-          >
-            <Controller
-              control={control}
-              name={`multipleAnswer`}
-              render={({ field: { onChange, name } }) => (
-                <Input
-                  type="checkbox"
-                  className="checkBoxRadio"
-                  style={{ width: "auto", height: "auto" }}
-                  onChange={onChange}
-                  name={name}
-                  disabled={options.length < 4 ? true : false}
-                />
-              )}
-            />
-
-            <Typography
-              style={{ color: "rgb(101, 109, 118)" }}
-              variant="caption"
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                rowGap: "1rem",
+              }}
             >
-              Multiple Answers?
-            </Typography>
-          </div>
-
-          <div
-            style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
-          >
-            {fields.map((field, idx) => (
-              <div key={field.id}>
-                <div
-                  style={{
-                    display: "flex",
-                    columnGap: "0.4rem",
-                    alignItems: "center",
-                  }}
-                  key={field.id}
-                >
-                  {/* <CheckBox checked={true} /> */}
-                  <Controller
-                    control={control}
-                    name={`options.${idx}.isAnswer`}
-                    render={({ field: { onChange, name } }) => {
-                      return (
-                        <Input
-                          name={name}
-                          defaultChecked={options[idx].isAnswer}
-                          style={{ width: "fit-content" }}
-                          type={`checkbox`}
-                          disabled={
-                            multipleAnswer &&
-                            !options[idx].isAnswer &&
-                            !canStillSelectAnswer
-                              ? true
-                              : false
-                          }
-                          ref={(el: HTMLInputElement) =>
-                            (radioRefs.current[idx] = el)
-                          }
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            console.log(
-                              options.filter((a) => a.isAnswer === true)
-                            );
-                            const newOptions = options.map(
-                              (a: AnswerOption, index: number) => {
-                                if (!multipleAnswer) {
-                                  console.log("single");
-                                  if (index === idx) {
-                                    onChange(e.target.checked);
-                                    return { ...a, isAnswer: true };
+              {fields.map((field, idx) => (
+                <div key={field.id}>
+                  <div
+                    style={{
+                      display: "flex",
+                      columnGap: "0.4rem",
+                      alignItems: "center",
+                    }}
+                    key={field.id}
+                  >
+                    {/* <CheckBox checked={true} /> */}
+                    <Controller
+                      control={control}
+                      name={`options.${idx}.isAnswer`}
+                      render={({ field: { onChange, name } }) => {
+                        return (
+                          <Input
+                            name={name}
+                            defaultChecked={options[idx].isAnswer}
+                            style={{ width: "fit-content" }}
+                            type={`checkbox`}
+                            disabled={
+                              multipleAnswer &&
+                              !options[idx].isAnswer &&
+                              !canStillSelectAnswer
+                                ? true
+                                : false
+                            }
+                            ref={(el: HTMLInputElement) =>
+                              (radioRefs.current[idx] = el)
+                            }
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              console.log(
+                                options.filter((a) => a.isAnswer === true)
+                              );
+                              const newOptions = options.map(
+                                (a: AnswerOption, index: number) => {
+                                  if (!multipleAnswer) {
+                                    console.log("single");
+                                    if (index === idx) {
+                                      onChange(e.target.checked);
+                                      return { ...a, isAnswer: true };
+                                    } else {
+                                      return { ...a, isAnswer: false };
+                                    }
                                   } else {
-                                    return { ...a, isAnswer: false };
-                                  }
-                                } else {
-                                  if (index === idx) {
-                                    onChange(e.target.checked);
-                                    const { isAnswer } = a;
+                                    if (index === idx) {
+                                      onChange(e.target.checked);
+                                      const { isAnswer } = a;
 
-                                    return {
-                                      ...a,
-                                      isAnswer: !isAnswer ? false : true,
-                                    };
-                                  } else {
-                                    return { ...a };
+                                      return {
+                                        ...a,
+                                        isAnswer: !isAnswer ? false : true,
+                                      };
+                                    } else {
+                                      return { ...a };
+                                    }
                                   }
                                 }
-                              }
-                            );
-                            //  console.log(newOptions);
-                            if (multipleAnswer) {
-                              setCanStillSelectAnswer(
-                                newOptions.filter(
-                                  (a: AnswerOption) => a.isAnswer === true
-                                ).length < 3
                               );
-                            }
-                            setValue("options", newOptions, {
-                              shouldValidate: true,
-                            });
-                          }}
-                          className="checkBoxRadio"
-                        />
-                      );
-                    }}
-                  />
-                  <Controller
-                    control={control}
-                    name={`options.${idx}.option`}
-                    render={({ field: { name } }) => (
-                      <div style={{ width: "100%" }}>
-                        <Input
-                          name={name}
-                          style={{ padding: "12px" }}
-                          defaultValue={options[idx].option || ""}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                            setValue(`options.${idx}.option`, e.target.value, {
-                              shouldValidate: true,
-                            });
-                          }}
-                          className={`${
-                            errors.options && errors?.options[idx]?.option
-                              ? "form-error"
-                              : ""
-                          }`}
-                        />
-                      </div>
-                    )}
-                  />
-                  <Button
-                    style={{
-                      width: "2rem",
-                      height: "2rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "1.5rem",
-                      borderRadius: "0.2rem",
-                      cursor: "pointer",
-                      border: "none",
-                      background: "#df1919",
-                      color: "aliceblue",
-                    }}
-                    type="button"
-                    className="error"
-                    disabled={options.length <= 2}
-                    onClick={() => {
-                      if (multipleAnswer) {
-                        resetOptions();
-                      }
-                      remove(idx);
-                    }}
-                  >
-                    <i className="bi bi-x"></i>
-                  </Button>
-                </div>
-                {(errors?.options &&
-                  errors?.options[idx] &&
-                  errors?.options[idx]?.option) && (
-                    <ErrorFormMessage
-                      message={errors?.options[idx]?.option?.message ?? ""}
+                              //  console.log(newOptions);
+                              if (multipleAnswer) {
+                                setCanStillSelectAnswer(
+                                  newOptions.filter(
+                                    (a: AnswerOption) => a.isAnswer === true
+                                  ).length < 3
+                                );
+                              }
+                              setValue("options", newOptions, {
+                                shouldValidate: true,
+                              });
+                            }}
+                            className="checkBoxRadio"
+                          />
+                        );
+                      }}
                     />
-                  )}
-              </div>
-            ))}
-          </div>
-          {errors.options && (
-            <ErrorFormMessage message={errors.options.message} />
-          )}
-          <div
-            style={{
-              display: "flex",
-              columnGap: "0.5rem",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              style={{
-                width: "2.25rem",
-                height: "2.25rem",
-                borderRadius: "0.2rem",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-                border: "none",
-                background: "#20a820",
-                color: "aliceblue",
-              }}
-              onClick={() => {
-                append({ isAnswer: false, option: "" });
-              }}
-              type="button"
-              disabled={fields.length === 5}
-            >
-              <i className="bi bi-plus"></i>
-            </Button>
-            <Typography sx={{ fontSize: "1rem" }}>Add new option</Typography>
-          </div>
-
-          <div>
-            <Divider />
-          </div>
-          <FeedBackContainer>
-            <FeedbackGridElement>
-              <Typography variant="caption" color="rgb(101, 109, 118)">
-                Correct Feedback
-              </Typography>
-              <TextArea style={{ minHeight: "5rem" }}></TextArea>
-            </FeedbackGridElement>
-            <FeedbackGridElement>
-              <Typography variant="caption" color="rgb(101, 109, 118)">
-                Incorrect Feedback
-              </Typography>
-              <TextArea style={{ minHeight: "5rem" }}></TextArea>
-            </FeedbackGridElement>
-          </FeedBackContainer>
-
-          <div>
-            <Divider />
+                    <Controller
+                      control={control}
+                      name={`options.${idx}.option`}
+                      render={({ field: { name } }) => (
+                        <div style={{ width: "100%" }}>
+                          <Input
+                            name={name}
+                            style={{ padding: "12px" }}
+                            value={options[idx].option || ""}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                              setValue(
+                                `options.${idx}.option`,
+                                e.target.value,
+                                {
+                                  shouldValidate: true,
+                                }
+                              );
+                            }}
+                            className={`${
+                              errors.options && errors?.options[idx]?.option
+                                ? "form-error"
+                                : ""
+                            }`}
+                          />
+                        </div>
+                      )}
+                    />
+                    <Button
+                      style={{
+                        width: "2rem",
+                        height: "2rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "1.5rem",
+                        borderRadius: "0.2rem",
+                        cursor: "pointer",
+                        border: "none",
+                        background: "#df1919",
+                        color: "aliceblue",
+                      }}
+                      type="button"
+                      className="error"
+                      disabled={options.length <= 2}
+                      onClick={() => {
+                        if (multipleAnswer) {
+                          resetOptions();
+                        }
+                        remove(idx);
+                      }}
+                    >
+                      <i className="bi bi-x"></i>
+                    </Button>
+                  </div>
+                  {errors?.options &&
+                    errors?.options[idx] &&
+                    errors?.options[idx]?.option && (
+                      <ErrorFormMessage
+                        message={errors?.options[idx]?.option?.message ?? ""}
+                      />
+                    )}
+                </div>
+              ))}
+            </div>
+            {errors.options && (
+              <ErrorFormMessage message={errors.options.message} />
+            )}
             <div
               style={{
-                width: "500px",
-                minWidth: "320px",
-                margin: "0 auto",
                 display: "flex",
-                justifyContent: "center",
                 columnGap: "0.5rem",
-                marginTop: "2rem",
+                alignItems: "center",
               }}
             >
-              <Button $primary type="submit">
-                Save
+              <Button
+                style={{
+                  width: "2.25rem",
+                  height: "2.25rem",
+                  borderRadius: "0.2rem",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  border: "none",
+                  background: "#20a820",
+                  color: "aliceblue",
+                }}
+                onClick={() => {
+                  append({ isAnswer: false, option: "" });
+                }}
+                type="button"
+                disabled={fields.length === 5}
+              >
+                <i className="bi bi-plus"></i>
               </Button>
-              <Button $secondary onClick={() => reset()}>
-                Cancel
-              </Button>
+              <Typography sx={{ fontSize: "1rem" }}>Add new option</Typography>
             </div>
-          </div>
-        </form>
+
+            <div>
+              <Divider />
+            </div>
+            <FeedBackContainer>
+              <FeedbackGridElement>
+                <Typography variant="caption" color="rgb(101, 109, 118)">
+                  Correct Feedback
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"correctFeedBack"}
+                  render={({ field: { name, onChange } }) => (
+                    <TextArea
+                      name={name}
+                      onChange={onChange}
+                      style={{ minHeight: "5rem" }}
+                      value={getValues().correctFeedBack}
+                    ></TextArea>
+                  )}
+                />
+              </FeedbackGridElement>
+              <FeedbackGridElement>
+                <Typography variant="caption" color="rgb(101, 109, 118)">
+                  Incorrect Feedback
+                </Typography>
+                <Controller
+                  control={control}
+                  name={"inCorrectFeedBack"}
+                  render={({ field: { name, onChange } }) => (
+                    <TextArea
+                      name={name}
+                      onChange={onChange}
+                      style={{ minHeight: "5rem" }}
+                      value={getValues().inCorrectFeedBack}
+                    ></TextArea>
+                  )}
+                />
+              </FeedbackGridElement>
+            </FeedBackContainer>
+
+            <div>
+              <Divider />
+              <div
+                style={{
+                  width: "500px",
+                  minWidth: "320px",
+                  margin: "0 auto",
+                  display: "flex",
+                  justifyContent: "center",
+                  columnGap: "0.5rem",
+                  marginTop: "2rem",
+                }}
+              >
+                <Button $primary type="submit">
+                  Save
+                </Button>
+                <Button $secondary onClick={() => reset()}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
@@ -488,20 +565,6 @@ const PageMenu = styled.div`
   height: inherit;
   padding: 0 0.275rem;
   border-bottom: 1px solid #eee;
-`;
-
-const QuestionType = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  &:after {
-    content: "";
-    position: absolute;
-    height: 15px;
-    border: 1px solid #eee;
-    right: -20px;
-  }
 `;
 
 const ActionsContainer = styled.div`

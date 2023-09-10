@@ -15,8 +15,9 @@ import { API_URL } from "../../../../settings/apis";
 import { usePageContext } from "../../../../hooks/usePageContext";
 import { TopicInterface } from "../../../../context/PageContext";
 import { Chip, Typography } from "@mui/material";
+import DashboardLayout from "../../../dashboadLayout";
 
-const EditTopic = () => {
+const EditTopic = ({ uuid }: any) => {
   const initV = {
     name: "",
     description: "",
@@ -61,18 +62,9 @@ const EditTopic = () => {
 
   const getSingleTopic = () => {
     reset();
-
-    const topicUrlParam: URLSearchParams | boolean =
-      typeof window !== undefined &&
-      new URLSearchParams(window.location.search);
-    let uuid = "";
-
-    if (topicUrlParam) {
-      uuid = topicUrlParam.get("topic") || "";
-    }
-
+  
     axiosAuthInstance
-      .get(API_URL.topics + "/" + (selectedTopic?.uuid || uuid))
+      .get(API_URL.topics + "/" + uuid)
       .then((r) => {
         const topic: TopicInterface = r.data;
 
@@ -104,7 +96,7 @@ const EditTopic = () => {
     return () => {
       setLoadingTopic(false);
     };
-  }, [selectedTopic?.uuid, loadingTopic]);
+  }, [uuid, loadingTopic]);
 
   const {
     control,
@@ -163,154 +155,160 @@ const EditTopic = () => {
   };
 
   return (
-    <div>
-      <PageTitleBar>
-        <IDContainerTitle>
-          <p>New set of questions</p>
-        </IDContainerTitle>
-      </PageTitleBar>
+    <DashboardLayout>
+      <div>
+        <PageTitleBar>
+          <IDContainerTitle>
+            <p>New set of questions</p>
+          </IDContainerTitle>
+        </PageTitleBar>
 
-      <div style={{ padding: "1rem" }}>
-        {!loadingTopic && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              // setLoadingTopic(true);
-              handleSubmit(handleOnSubmit);
-            }}
-            style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
-          >
-            <div>
-              <Typography
-                style={{ color: "rgb(101, 109, 118)" }}
-                textTransform={"uppercase"}
-                variant="caption"
-              >
-                Name
-              </Typography>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field: { onChange, name } }) => (
-                  <Input
-                    placeholder="Question"
-                    name={name}
-                    onChange={onChange}
-                    ref={nameRef}
-                    value={getValues().name}
-                  />
-                )}
-              />
-              {errors.name && (
-                <ErrorFormMessage message={errors.name.message} />
-              )}
-            </div>
-            <div>
-              <Typography
-                style={{ color: "rgb(101, 109, 118)" }}
-                textTransform={"uppercase"}
-                variant="caption"
-              >
-                Type
-              </Typography>
-              <Controller
-                name="type"
-                control={control}
-                defaultValue={getValues().type}
-                render={({ field: { onChange, name, value } }) => (
-                  <Select name={name} onChange={onChange} value={value}>
-                    <option value={`mcq`}>MCQ</option>
-                    {/* <option value={`question_answer`} disabled>Question Answer</option> */}
-                  </Select>
-                )}
-              />
-              {errors.type && (
-                <ErrorFormMessage message={errors.type.message} />
-              )}
-            </div>
-            <div>
-              <Typography
-                style={{ color: "rgb(101, 109, 118)" }}
-                textTransform={"uppercase"}
-                variant="caption"
-              >
-                Tags
-              </Typography>
-
-              <Input
-                placeholder="tags"
-                ref={tagRef}
-                onKeyDown={(e: any) => addTags(e)}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  columnGap: "0.5rem",
-                  rowGap: "0.5rem",
-                  marginTop: "0.5rem",
-                }}
-              >
-                {tags.map((tag: any, index: number) => {
-                  return (
-                    <Chip
-                      key={index}
-                      label={tag?.text}
-                      onDelete={() => removeTags(tag.index)}
+        <div style={{ padding: "1rem" }}>
+          {!loadingTopic && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // setLoadingTopic(true);
+                handleSubmit(handleOnSubmit);
+              }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                rowGap: "1rem",
+              }}
+            >
+              <div>
+                <Typography
+                  style={{ color: "rgb(101, 109, 118)" }}
+                  textTransform={"uppercase"}
+                  variant="caption"
+                >
+                  Name
+                </Typography>
+                <Controller
+                  name="name"
+                  control={control}
+                  render={({ field: { onChange, name } }) => (
+                    <Input
+                      placeholder="Question"
+                      name={name}
+                      onChange={onChange}
+                      ref={nameRef}
+                      value={getValues().name}
                     />
-                  );
-                })}
-              </div>
-              {errors.tags && (
-                <ErrorFormMessage message={errors.tags.message} />
-              )}
-            </div>
-            <div>
-              <Typography
-                style={{ color: "rgb(101, 109, 118)" }}
-                textTransform={"uppercase"}
-                variant="caption"
-              >
-                Description
-              </Typography>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field: { onChange, name } }) => (
-                  <Input
-                    placeholder="description"
-                    name={name}
-                    onChange={onChange}
-                    ref={descriptionRef}
-                    value={getValues().description}
-                  />
+                  )}
+                />
+                {errors.name && (
+                  <ErrorFormMessage message={errors.name.message} />
                 )}
-              />
-              {errors.description && (
-                <ErrorFormMessage message={errors.description.message} />
-              )}
-            </div>
-            <div>
-              <Divider />
-              <div
-                style={{
-                  width: "500px",
-                  minWidth: "320px",
-                  margin: "0 auto",
-                  display: "flex",
-                  justifyContent: "center",
-                  columnGap: "0.5rem",
-                  marginTop: "2rem",
-                }}
-              >
-                <Button $primary type="submit">
-                  Save
-                </Button>
               </div>
-            </div>
-          </form>
-        )}
+              <div>
+                <Typography
+                  style={{ color: "rgb(101, 109, 118)" }}
+                  textTransform={"uppercase"}
+                  variant="caption"
+                >
+                  Type
+                </Typography>
+                <Controller
+                  name="type"
+                  control={control}
+                  defaultValue={getValues().type}
+                  render={({ field: { onChange, name, value } }) => (
+                    <Select name={name} onChange={onChange} value={value}>
+                      <option value={`mcq`}>MCQ</option>
+                      {/* <option value={`question_answer`} disabled>Question Answer</option> */}
+                    </Select>
+                  )}
+                />
+                {errors.type && (
+                  <ErrorFormMessage message={errors.type.message} />
+                )}
+              </div>
+              <div>
+                <Typography
+                  style={{ color: "rgb(101, 109, 118)" }}
+                  textTransform={"uppercase"}
+                  variant="caption"
+                >
+                  Tags
+                </Typography>
+
+                <Input
+                  placeholder="tags"
+                  ref={tagRef}
+                  onKeyDown={(e: any) => addTags(e)}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    columnGap: "0.5rem",
+                    rowGap: "0.5rem",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  {tags.map((tag: any, index: number) => {
+                    return (
+                      <Chip
+                        key={index}
+                        label={tag?.text}
+                        onDelete={() => removeTags(tag.index)}
+                      />
+                    );
+                  })}
+                </div>
+                {errors.tags && (
+                  <ErrorFormMessage message={errors.tags.message} />
+                )}
+              </div>
+              <div>
+                <Typography
+                  style={{ color: "rgb(101, 109, 118)" }}
+                  textTransform={"uppercase"}
+                  variant="caption"
+                >
+                  Description
+                </Typography>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field: { onChange, name } }) => (
+                    <Input
+                      placeholder="description"
+                      name={name}
+                      onChange={onChange}
+                      ref={descriptionRef}
+                      value={getValues().description}
+                    />
+                  )}
+                />
+                {errors.description && (
+                  <ErrorFormMessage message={errors.description.message} />
+                )}
+              </div>
+              <div>
+                <Divider />
+                <div
+                  style={{
+                    width: "500px",
+                    minWidth: "320px",
+                    margin: "0 auto",
+                    display: "flex",
+                    justifyContent: "center",
+                    columnGap: "0.5rem",
+                    marginTop: "2rem",
+                  }}
+                >
+                  <Button $primary type="submit">
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

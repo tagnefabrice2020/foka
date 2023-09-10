@@ -11,6 +11,7 @@ import Badge, { BadgeProps } from "@mui/material/Badge";
 import { styled as Mstyled } from "@mui/material/styles";
 import { Box, IconButton } from "@mui/material";
 import { TopicInterface } from "../../context/PageContext";
+import { navigate } from "gatsby";
 
 const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -24,10 +25,10 @@ const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
 const SideMenu = () => {
   const { t } = useTranslation();
   const { logout } = useLogout();
-  const { setPage, setSelectedTopic, selectedTopic, page, topics, setTopics } = usePageContext();
+  const { setPage, setSelectedTopic, selectedTopic, page, topics, setTopics } =
+    usePageContext();
 
   const [loading, setLoading] = useState(true);
-
 
   const loadTopics = () => {
     setLoading(true);
@@ -50,32 +51,6 @@ const SideMenu = () => {
       setLoading(false);
     };
   }, []);
-
-  useEffect(() => {
-    function getActiveTopic() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const page = urlParams.get("section");
-
-      if (page === "edit-topic" || page === "add-a-question") {
-        let topicUuid = new URLSearchParams(window.location.search)
-          .get("topic")
-          ?.toString();
-
-        if (topicUuid && topicUuid?.length > 0) {
-          if (topics.length > 0) {
-            let topicIndex = topics.findIndex(
-              (topic: TopicInterface) => topic?.uuid === topicUuid
-            );
-
-            if (topicIndex > 0) {
-              setSelectedTopic(topics[topicIndex]);
-            }
-          }
-        }
-      }
-    }
-    getActiveTopic();
-  }, [topics.length]);
 
   return (
     <SideMenuContainer>
@@ -118,10 +93,6 @@ const SideMenu = () => {
                   maxWidth: "7rem",
                   overflow: "scroll",
                 }}
-                onClick={() => {
-                  setSelectedTopic(topic);
-                  setPage("questionList");
-                }}
               >
                 <Box
                   sx={{
@@ -130,7 +101,14 @@ const SideMenu = () => {
                       "linear-gradient(to right, #fff 60%, transparent)",
                   }}
                 >
-                  <p style={{ fontSize: "0.8rem" }}>{topic.name}</p>
+                  <p
+                    style={{ fontSize: "0.8rem" }}
+                    onClick={() => {
+                      navigate(`/account/questions/${topic.uuid}`);
+                    }}
+                  >
+                    {topic.name}
+                  </p>
                 </Box>
               </Box>
               <Box
@@ -169,8 +147,8 @@ const SideMenu = () => {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedTopic(topic);
-                    setPage("editTopic");
+
+                    navigate(`/account/topic/${topic.uuid}/edit`);
                   }}
                 >
                   <i
@@ -203,8 +181,7 @@ const SideMenu = () => {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedTopic(topic);
-                    setPage("addQuestion");
+                    navigate(`/account/questions/${topic.uuid}/add`);
                   }}
                 >
                   <i className="bi bi-plus" style={{ fontSize: "0.7rem" }}></i>
