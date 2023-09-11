@@ -12,6 +12,7 @@ import { styled as Mstyled } from "@mui/material/styles";
 import { Box, IconButton } from "@mui/material";
 import { TopicInterface } from "../../context/PageContext";
 import { navigate } from "gatsby";
+import { Link } from "gatsby";
 
 const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -101,14 +102,12 @@ const SideMenu = () => {
                       "linear-gradient(to right, #fff 60%, transparent)",
                   }}
                 >
-                  <p
-                    style={{ fontSize: "0.8rem" }}
-                    onClick={() => {
-                      navigate(`/account/questions/${topic.uuid}`);
-                    }}
+                  <Link
+                    to={`/account/questions/${topic.uuid}`}
+                    style={{ fontSize: "0.8rem", fontFamily: "Roboto" }}
                   >
                     {topic.name}
-                  </p>
+                  </Link>
                 </Box>
               </Box>
               <Box
@@ -124,68 +123,51 @@ const SideMenu = () => {
               />
 
               <Box sx={{ display: "flex", columnGap: "0.5rem" }}>
-                <IconButton
-                  aria-label="edit topic"
-                  sx={{
-                    flexBasis: "1.825rem",
-                    "&:hover": {
-                      background: "rgb(6, 113, 113)",
-                      color:
-                        selectedTopic?.uuid === topic.uuid &&
-                        page === "editTopic"
-                          ? "aliceblue"
-                          : "black",
-                    },
-                    color:
-                      selectedTopic?.uuid === topic.uuid && page === "editTopic"
-                        ? "aliceblue"
-                        : "black",
-                    background:
-                      selectedTopic?.uuid === topic.uuid && page === "editTopic"
-                        ? "rgb(6, 113, 113)"
-                        : "rgba(0, 0, 0, 0.04)",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-
-                    navigate(`/account/topic/${topic.uuid}/edit`);
-                  }}
+                <Link to={`/account/topic/${topic.uuid}/edit`}>
+                  <IconButton
+                    aria-label="edit topic"
+                    sx={{
+                      flexBasis: "1.825rem",
+                      "&:hover": {
+                        background: "rgb(6, 113, 113)",
+                        color:
+                          selectedTopic?.uuid === topic.uuid &&
+                          page === "editTopic"
+                            ? "aliceblue"
+                            : "black",
+                      },
+                      color: "black",
+                      background: "rgba(0, 0, 0, 0.04)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-pencil"
+                      style={{ fontSize: "0.7rem" }}
+                    ></i>
+                  </IconButton>
+                </Link>
+                <Link
+                  to={`/account/questions/${topic.uuid}/add`}
+                  activeClassName="active"
                 >
-                  <i
-                    className="bi bi-pencil"
-                    style={{ fontSize: "0.7rem" }}
-                  ></i>
-                </IconButton>
-                <IconButton
-                  aria-label="add question"
-                  sx={{
-                    flexBasis: "1.825rem",
-                    "&:hover": {
-                      background: "rgb(6, 113, 113)",
-                      color:
-                        selectedTopic?.uuid === topic.uuid &&
-                        page === "addQuestion"
-                          ? "aliceblue"
-                          : "black",
-                    },
-                    color:
-                      selectedTopic?.uuid === topic.uuid &&
-                      page === "addQuestion"
-                        ? "aliceblue"
-                        : "black",
-                    background:
-                      selectedTopic?.uuid === topic.uuid &&
-                      page === "addQuestion"
-                        ? "rgb(6, 113, 113)"
-                        : "rgba(0, 0, 0, 0.04)",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/account/questions/${topic.uuid}/add`);
-                  }}
-                >
-                  <i className="bi bi-plus" style={{ fontSize: "0.7rem" }}></i>
-                </IconButton>
+                  <IconButton
+                    aria-label="add question"
+                    sx={{
+                      flexBasis: "1.825rem",
+                      "&:hover": {
+                        background: "rgb(6, 113, 113)",
+                        color: "black",
+                      },
+                      color: "black",
+                      background: "rgba(0, 0, 0, 0.04)",
+                    }}
+                  >
+                    <i
+                      className="bi bi-plus"
+                      style={{ fontSize: "0.7rem" }}
+                    ></i>
+                  </IconButton>
+                </Link>
               </Box>
             </li>
           </StyledBadge>

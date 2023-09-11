@@ -26,6 +26,7 @@ export const QuestionSchema = object({
   multipleAnswer: boolean().default(false),
   correctFeedBack: string(),
   inCorrectFeedBack: string(),
+  topic: string()
 });
 
 export type AnswerOption = {
@@ -37,7 +38,7 @@ export type QuestionType = {
   question: string;
   options: AnswerOption[];
   tags: string[];
-  topic: number | undefined;
+  topic: string | undefined;
   multipleAnswer: boolean;
   correctFeedBack: string;
   inCorrectFeedBack: string;

@@ -46,3 +46,13 @@ h3 {
 .hide-scroll::-webkit-scrollbar {
     display: none;
 }
+
+/* Target links with aria-current="page" attribute */
+a[aria-current="page"] > button {
+    /* Add your styles here */
+    background-color: #007bff;
+    /* Change to the desired background color */
+    color: #fff;
+    /* Change to the desired text color */
+    /* Add any other styles you want */
+}
