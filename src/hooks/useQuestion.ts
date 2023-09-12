@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { QuestionType } from "../formSchema/questionSchema";
+import { OptionUpdateType, QuestionType, QuestionUpdateType } from "../formSchema/questionSchema";
 import { axiosAuthInstance } from "../settings/axiosSetting";
 import { API_URL } from "../settings/apis";
 import ToastNotification from "../components/toast";
@@ -47,8 +47,57 @@ const useQuestion = () => {
     return false;
   };
 
+  const EditQuestion = async (
+    uuid: string,
+    { question }: QuestionUpdateType
+  ): Promise<boolean> => {
+    setIspending(true);
+
+    return axiosAuthInstance
+      .put(`${API_URL.questions}/${uuid}/update`, { question: question })
+      .then((res) => {
+        setIspending(false);
+        setError("");
+        ToastNotification({ message: "Successfull", type: "success" });
+        return true;
+      })
+      .catch((e) => {
+        setIspending(false);
+        setError(e.message);
+        ToastNotification({ message: "Ooops something went wrong!", type: "error" });
+        return false;
+      });
+  };
+
+  const EditSingleOption = async (
+    uuid: string,
+    { option }: OptionUpdateType
+  ): Promise<boolean> => {
+    setIspending(true);
+
+    return axiosAuthInstance
+      .put(`${API_URL.options}/${uuid}/update`, { option: option })
+      .then((res) => {
+        setIspending(false);
+        setError("");
+        ToastNotification({ message: "Successfull", type: "success" });
+        return true;
+      })
+      .catch((e) => {
+        setIspending(false);
+        setError(e.message);
+        ToastNotification({
+          message: "Ooops something went wrong!",
+          type: "error",
+        });
+        return false;
+      });
+  };
+
   return {
     createQuestion,
+    EditQuestion,
+    EditSingleOption,
     getQuestionList,
     setIspending,
     isPending,

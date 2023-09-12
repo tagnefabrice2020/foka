@@ -9,6 +9,27 @@ import React, {
 } from "react";
 import { appendQueryParameters } from "../utils/appendQueryParameters";
 
+export interface Option {
+  id: number;
+  uuid: string;
+  question_id: number;
+  option_text: string;
+  is_correct: number;
+  created_at: string; // This should be a timestamp or date string
+  updated_at: string; // This should be a timestamp or date string
+}
+export interface Question {
+  id: number;
+  uuid: string;
+  topic_id: number;
+  created_by: number;
+  question: string;
+  tags: string;
+  created_at: string; // This should be a timestamp or date string
+  updated_at: string; // This should be a timestamp or date string
+  options: Option[];
+}
+
 export interface TopicInterface {
   author_id: number;
   created_at: string;
@@ -23,25 +44,29 @@ export interface TopicInterface {
 }
 
 export type PageContextType = {
-  page: "addQuestion" | "addTopic" | "questionList" | "editTopic" | "";
-  setPage: Dispatch<
-    SetStateAction<
-      "addQuestion" | "addTopic" | "questionList" | "editTopic" | ""
-    >
-  >;
+  questionPage: number;
+  setQuestionPage: Dispatch<SetStateAction<number>>;
+  totalQuestionPages: number;
+  setTotalQuestionPages: Dispatch<SetStateAction<number>>;
   setSelectedTopic: Dispatch<SetStateAction<TopicInterface | null>>;
   selectedTopic: TopicInterface | null;
   topics: TopicInterface[];
   setTopics: Dispatch<SetStateAction<TopicInterface[]>>;
+  questions: Question[];
+  setQuestions: Dispatch<SetStateAction<Question[]>>;
 };
 
 export const PageContext = createContext<PageContextType>({
-  page: "questionList",
-  setPage: () => null,
+  questionPage: 1,
+  setQuestionPage: () => null,
   selectedTopic: null, // topic id
   setSelectedTopic: () => null,
   topics: [],
   setTopics: () => null,
+  questions: [],
+  setQuestions: () => null,
+  totalQuestionPages: 0,
+  setTotalQuestionPages: () => null,
 });
 
 export type Props = {
@@ -49,24 +74,29 @@ export type Props = {
 };
 
 export const PageContextProvider: FC<Props> = ({ children }) => {
-  const [page, setPage] = useState<
-    "addQuestion" | "addTopic" | "questionList" | "editTopic" | ""
-  >("");
   const [selectedTopic, setSelectedTopic] = useState<TopicInterface | null>(
     null
   );
+
+  const [questions, setQuestions] = useState<Question[]>([]);
+const [totalQuestionPages, setTotalQuestionPages] = useState<number>(0);
+  const [questionPage, setQuestionPage] = useState<number>(1);
 
   const [topics, setTopics] = useState<TopicInterface[]>([]);
 
   return (
     <PageContext.Provider
       value={{
-        page,
-        setPage,
+        questionPage,
+        setQuestionPage,
         selectedTopic,
         setSelectedTopic,
         topics,
         setTopics,
+        questions,
+        setQuestions,
+        totalQuestionPages,
+        setTotalQuestionPages,
       }}
     >
       <>{children}</>

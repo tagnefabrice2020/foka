@@ -3,12 +3,42 @@ import { AuthContext } from "../context/AuthContext";
 import { PageContext } from "../context/PageContext";
 
 export const usePageContext = () => {
-  const { page, setPage, selectedTopic, setSelectedTopic, topics, setTopics } =
-    useContext(PageContext);
+  const {
+    questionPage,
+    setQuestionPage,
+    selectedTopic,
+    setSelectedTopic,
+    topics,
+    setTopics,
+    questions,
+    setQuestions,
+    totalQuestionPages,
+    setTotalQuestionPages
+  } = useContext(PageContext);
 
-  if (!page && !setPage) {
-    throw new Error("usePageContext must be inside the AuthPageProvider!");
-  }
+  // if (
+  //   !questionPage ||
+  //   !setQuestionPage ||
+  //   !selectedTopic ||
+  //   !setSelectedTopic ||
+  //   !topics ||
+  //   !setTopics ||
+  //   !questions ||
+  //   !setQuestions
+  // ) {
+  //   throw new Error("usePageContext must be inside the AuthPageProvider!");
+  // }
 
-  return { page, setPage, selectedTopic, setSelectedTopic, topics, setTopics };
+  return {
+    questionPage,
+    setQuestionPage,
+    selectedTopic,
+    setSelectedTopic,
+    topics,
+    setTopics,
+    questions,
+    setQuestions,
+    totalQuestionPages,
+    setTotalQuestionPages
+  };
 };

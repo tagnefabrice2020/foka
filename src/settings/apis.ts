@@ -4,5 +4,6 @@ export const API_URL = {
   logout: "/logout",
   topics: "/topics",
   questions: "/questions",
+  options: "options",
   sanctum: "/sanctum/csrf-cookie"
 };
