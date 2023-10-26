@@ -9,10 +9,11 @@ import { API_URL } from "../../settings/apis";
 
 import Badge, { BadgeProps } from "@mui/material/Badge";
 import { styled as Mstyled } from "@mui/material/styles";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { TopicInterface } from "../../context/PageContext";
 import { navigate } from "gatsby";
 import { Link } from "gatsby";
+import { Input } from "../input";
 
 const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -26,7 +27,7 @@ const StyledBadge = Mstyled(Badge)<BadgeProps>(({ theme }) => ({
 const SideMenu = () => {
   const { t } = useTranslation();
   const { logout } = useLogout();
-  const { setPage, setSelectedTopic, selectedTopic, page, topics, setTopics } =
+  const { setSelectedTopic, selectedTopic, topics, setTopics } =
     usePageContext();
 
   const [loading, setLoading] = useState(true);
@@ -55,123 +56,252 @@ const SideMenu = () => {
 
   return (
     <SideMenuContainer>
+      <Box sx={{ height: "fit-content", display: "contents" }}>
+        <Input />
+      </Box>
       <ul
+        className="hide-scroll"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          rowGap: "1rem",
-          alignItems: "center",
+          minHeight: "calc(100vh - 50rem)",
+          overflow: "scroll",
         }}
       >
-        {topics.map((topic: any, idx: number) => (
-          <StyledBadge
-            color="secondary"
-            max={100}
-            badgeContent={topic.questions_count}
-            sx={{ width: "100%" }}
-            key={idx}
-          >
-            <li
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
-                alignItems: "center",
-                padding: "0.2rem 0.5rem",
-                borderRadius: "3px",
-                border: "1px solid #d0d7de",
-                cursor: "pointer",
-                position: "relative",
-              }}
+        <Box
+          mt={2}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            rowGap: "1rem",
+            alignItems: "center",
+          }}
+        >
+          {topics.map((topic: any, idx: number) => (
+            <StyledBadge
+              color="secondary"
+              max={100}
+              badgeContent={topic.questions_count}
+              sx={{ width: "100%" }}
+              key={idx}
             >
-              <Box
-                className="hide-scroll"
-                sx={{
-                  flexGrow: 1,
+              <li
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                  padding: "0.2rem 0.5rem",
+                  borderRadius: "3px",
+                  border: "1px solid #d0d7de",
+                  cursor: "pointer",
                   position: "relative",
-                  overflowX: "scroll",
-                  "&:hover p": { textDecoration: "underline" },
-                  maxWidth: "7rem",
-                  overflow: "scroll",
                 }}
               >
                 <Box
+                  className="hide-scroll"
                   sx={{
-                    minWidth: "20rem",
-                    background:
-                      "linear-gradient(to right, #fff 60%, transparent)",
+                    flexGrow: 1,
+                    position: "relative",
+                    overflowX: "scroll",
+                    "&:hover p": { textDecoration: "underline" },
+                    maxWidth: "7rem",
+                    overflow: "scroll",
                   }}
                 >
-                  <Link
-                    to={`/account/questions/${topic.uuid}`}
-                    style={{ fontSize: "0.8rem", fontFamily: "Roboto" }}
+                  <Box
+                    sx={{
+                      minWidth: "20rem",
+                      background:
+                        "linear-gradient(to right, #fff 60%, transparent)",
+                    }}
                   >
-                    {topic.name}
+                    <Link
+                      to={`/account/questions/${topic.uuid}`}
+                      style={{ fontSize: "0.8rem", fontFamily: "Roboto" }}
+                    >
+                      <Typography variant="caption">{topic.name}</Typography>
+                    </Link>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: 73,
+                    width: "2rem",
+                    height: "100%",
+                    // background: "red",
+                    background:
+                      "linear-gradient(to left, #fff 20%, transparent)",
+                    top: 0,
+                  }}
+                />
+
+                <Box sx={{ display: "flex", columnGap: "0.5rem" }}>
+                  <Link to={`/account/topic/${topic.uuid}/edit`}>
+                    <IconButton
+                      aria-label="edit topic"
+                      sx={{
+                        flexBasis: "1.875rem",
+                        height: "1.775rem",
+                        "&:hover": {
+                          boxShadow:
+                            "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px",
+                          color:
+                            selectedTopic?.uuid === topic.uuid
+                              ? "aliceblue"
+                              : "black",
+                        },
+                        color: "black",
+                        background: "rgba(0, 0, 0, 0.04)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-pencil"
+                        style={{ fontSize: "0.7rem" }}
+                      ></i>
+                    </IconButton>
+                  </Link>
+                  <Link
+                    to={`/account/questions/${topic.uuid}/add`}
+                    activeClassName="active"
+                  >
+                    <IconButton
+                      aria-label="add question"
+                      sx={{
+                        flexBasis: "1.875rem",
+                        height: "1.775rem",
+                        "&:hover": {
+                          boxShadow:
+                            "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px",
+                          color: "black",
+                        },
+                        color: "black",
+                        background: "rgba(0, 0, 0, 0.04)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-plus"
+                        style={{ fontSize: "0.7rem" }}
+                      ></i>
+                    </IconButton>
                   </Link>
                 </Box>
-              </Box>
-              <Box
-                sx={{
-                  position: "absolute",
-                  right: 73,
-                  width: "2rem",
-                  height: "100%",
-                  // background: "red",
-                  background: "linear-gradient(to left, #fff 20%, transparent)",
-                  top: 0,
+              </li>
+            </StyledBadge>
+          ))}
+          {topics.map((topic: any, idx: number) => (
+            <StyledBadge
+              color="secondary"
+              max={100}
+              badgeContent={topic.questions_count}
+              sx={{ width: "100%" }}
+              key={idx}
+            >
+              <li
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  alignItems: "center",
+                  padding: "0.2rem 0.5rem",
+                  borderRadius: "3px",
+                  border: "1px solid #d0d7de",
+                  cursor: "pointer",
+                  position: "relative",
                 }}
-              />
-
-              <Box sx={{ display: "flex", columnGap: "0.5rem" }}>
-                <Link to={`/account/topic/${topic.uuid}/edit`}>
-                  <IconButton
-                    aria-label="edit topic"
-                    sx={{
-                      flexBasis: "1.825rem",
-                      "&:hover": {
-                        background: "rgb(6, 113, 113)",
-                        color:
-                          selectedTopic?.uuid === topic.uuid &&
-                          page === "editTopic"
-                            ? "aliceblue"
-                            : "black",
-                      },
-                      color: "black",
-                      background: "rgba(0, 0, 0, 0.04)",
-                    }}
-                  >
-                    <i
-                      className="bi bi-pencil"
-                      style={{ fontSize: "0.7rem" }}
-                    ></i>
-                  </IconButton>
-                </Link>
-                <Link
-                  to={`/account/questions/${topic.uuid}/add`}
-                  activeClassName="active"
+              >
+                <Box
+                  className="hide-scroll"
+                  sx={{
+                    flexGrow: 1,
+                    position: "relative",
+                    overflowX: "scroll",
+                    "&:hover p": { textDecoration: "underline" },
+                    maxWidth: "7rem",
+                    overflow: "scroll",
+                  }}
                 >
-                  <IconButton
-                    aria-label="add question"
+                  <Box
                     sx={{
-                      flexBasis: "1.825rem",
-                      "&:hover": {
-                        background: "rgb(6, 113, 113)",
-                        color: "black",
-                      },
-                      color: "black",
-                      background: "rgba(0, 0, 0, 0.04)",
+                      minWidth: "20rem",
+                      background:
+                        "linear-gradient(to right, #fff 60%, transparent)",
                     }}
                   >
-                    <i
-                      className="bi bi-plus"
-                      style={{ fontSize: "0.7rem" }}
-                    ></i>
-                  </IconButton>
-                </Link>
-              </Box>
-            </li>
-          </StyledBadge>
-        ))}
+                    <Link
+                      to={`/account/questions/${topic.uuid}`}
+                      style={{ fontSize: "0.8rem", fontFamily: "Roboto" }}
+                    >
+                      <Typography variant="caption">{topic.name}</Typography>
+                    </Link>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: 73,
+                    width: "2rem",
+                    height: "100%",
+                    // background: "red",
+                    background:
+                      "linear-gradient(to left, #fff 20%, transparent)",
+                    top: 0,
+                  }}
+                />
+
+                <Box sx={{ display: "flex", columnGap: "0.5rem" }}>
+                  <Link to={`/account/topic/${topic.uuid}/edit`}>
+                    <IconButton
+                      aria-label="edit topic"
+                      sx={{
+                        flexBasis: "1.875rem",
+                        height: "1.775rem",
+                        "&:hover": {
+                          boxShadow:
+                            "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px",
+                          color:
+                            selectedTopic?.uuid === topic.uuid
+                              ? "aliceblue"
+                              : "black",
+                        },
+                        color: "black",
+                        background: "rgba(0, 0, 0, 0.04)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-pencil"
+                        style={{ fontSize: "0.7rem" }}
+                      ></i>
+                    </IconButton>
+                  </Link>
+                  <Link
+                    to={`/account/questions/${topic.uuid}/add`}
+                    activeClassName="active"
+                  >
+                    <IconButton
+                      aria-label="add question"
+                      sx={{
+                        flexBasis: "1.875rem",
+                        height: "1.775rem",
+                        "&:hover": {
+                          boxShadow:
+                            "rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px",
+                          color: "black",
+                        },
+                        color: "black",
+                        background: "rgba(0, 0, 0, 0.04)",
+                      }}
+                    >
+                      <i
+                        className="bi bi-plus"
+                        style={{ fontSize: "0.7rem" }}
+                      ></i>
+                    </IconButton>
+                  </Link>
+                </Box>
+              </li>
+            </StyledBadge>
+          ))}
+        </Box>
       </ul>
 
       <div
@@ -185,22 +315,20 @@ const SideMenu = () => {
         <Button
           style={{
             padding: "0.3rem",
-            border: "1px solid #eee",
-            borderRadius: "3px",
           }}
-          onClick={() => setPage("addTopic")}
+          $primary
+          onClick={() => navigate("/account/topic/add")}
         >
-          new set
+          <Typography variant="caption">New Question Bank</Typography>
         </Button>
         <Button
           style={{
             padding: "0.3rem",
-            border: "1px solid #eee",
-            borderRadius: "3px",
           }}
+          $danger
           onClick={() => logout()}
         >
-          {t("logout")}
+          <Typography variant="caption">Logout</Typography>
         </Button>
       </div>
     </SideMenuContainer>
@@ -230,7 +358,6 @@ const SideMenuContainer = styled.aside`
   flex-direction: column;
   justify-content: space-between;
   row-gap: 1rem;
-  overflow: scroll;
   padding: 1rem 0.5rem;
   & > * {
     flex-basis: 100%;

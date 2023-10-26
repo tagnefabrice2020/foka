@@ -13,6 +13,8 @@ import EditTopic from "../../components/pages/topic/edit";
 import NotFound from "../../components/pages/notfound";
 import Dashboard from "../../components/pages/dashboard";
 import QuestionList from "../../components/pages/quiz/list";
+import Topic from "../../components/pages/topic";
+import MyBundles from "../../components/pages/myBundles";
 
 const Account = () => {
   return (
@@ -24,9 +26,11 @@ const Account = () => {
           <PrivateRoute path="/" component={Dashboard} />
           <PrivateRoute path="/questions/:uuid" component={QuestionList} />
           <PrivateRoute path="/questions/:uuid/add" component={AddQuestion} />
-          {/* <PrivateRoute path="/questions/:uuid/edit" component={} />
-          <PrivateRoute path="/topic/add" component={} />
-          */}
+          <PrivateRoute path="/topic/add" component={Topic} />
+          <PrivateRoute path="/questions/:uuid/edit" component={EditTopic} />
+          <PrivateRoute path="/dashboard" component={Dashboard} />
+          <PrivateRoute path="/my-bundles" component={MyBundles} />
+
           <PrivateRoute path="/topic/:uuid/edit" component={EditTopic} />
           <PrivateRoute path="*" component={NotFound} />
           <GuestRoute path="*" component={NotFound} />
@@ -34,7 +38,17 @@ const Account = () => {
         <Router basepath="/:lang/account">
           <GuestRoute path="/login" component={Login} />
           <GuestRoute path="/register" component={Register} />
-          <PrivateRoute path="/questions" component={Question} />
+          <PrivateRoute path="/" component={Dashboard} />
+          <PrivateRoute path="/questions/:uuid" component={QuestionList} />
+          <PrivateRoute path="/questions/:uuid/add" component={AddQuestion} />
+          <PrivateRoute path="/topic/add" component={Topic} />
+          <PrivateRoute path="/questions/:uuid/edit" component={EditTopic} />
+          <PrivateRoute path="/dashboard" component={Dashboard} />
+          <PrivateRoute path="/my-bundles" component={MyBundles} />
+          
+          <PrivateRoute path="/topic/:uuid/edit" component={EditTopic} />
+          <PrivateRoute path="*" component={NotFound} />
+          <GuestRoute path="*" component={NotFound} />
         </Router>
       </PageContextProvider>
     </AuthContextProvider>

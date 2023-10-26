@@ -3,6 +3,7 @@ import { OptionUpdateType, QuestionType, QuestionUpdateType } from "../formSchem
 import { axiosAuthInstance } from "../settings/axiosSetting";
 import { API_URL } from "../settings/apis";
 import ToastNotification from "../components/toast";
+import { usePageContext } from "./usePageContext";
 
 const useQuestion = () => {
   const [isPending, setIspending] = useState<boolean>(false);
@@ -35,9 +36,12 @@ const useQuestion = () => {
       });
   };
 
-  const getQuestionList = async (id: number): Promise<boolean> => {
+  const getQuestionList = async (uuid: string, questionPage: number): Promise<boolean> => {
     setIspending(true);
-    let response = await axiosAuthInstance.get(API_URL.questions);
+    setQuestions([]);
+    let response = await axiosAuthInstance.get(
+      `${API_URL.topics}/${uuid}/?perPage=6&page=${questionPage}`
+    );
 
     if (response.status === 200) {
       setIspending(false);
@@ -94,12 +98,34 @@ const useQuestion = () => {
       });
   };
 
+  const DeleteQuestion = async (uuid: string): Promise<boolean> => {
+    setIspending(true);
+    return axiosAuthInstance
+      .delete(`${API_URL.questions}/${uuid}`)
+      .then((res) => {
+        setIspending(false);
+        setError("");
+        ToastNotification({ message: "Successfull", type: "success" });
+        return true;
+      })
+      .catch((e) => {
+        setIspending(false);
+        setError(e.message);
+        ToastNotification({
+          message: "Ooops something went wrong!",
+          type: "error",
+        });
+        return false;
+      });
+  }
+
   return {
     createQuestion,
     EditQuestion,
     EditSingleOption,
     getQuestionList,
     setIspending,
+    DeleteQuestion,
     isPending,
     error,
     setError,

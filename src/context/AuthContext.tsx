@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useIsAuth } from "../hooks/useIsAuth";
 import { axiosAuthInstance } from "../settings/axiosSetting";
+import { TimerContext } from "./TimerContext";
 
 type UserType = {
   country_id: number | null | undefined;
@@ -174,11 +175,21 @@ export const AuthContextProvider: FC<Props> = ({ children }) => {
     return () => setMounted(false);
   }, [mounted]);
 
+
+  const [isPaused, setPause] = useState<boolean>(false);
+  const [duration, setDuration] = useState<number>(
+    1.5 * 20 * 60 * 1000
+  );
+
   return (
     <AuthContext.Provider
       value={{ state, dispatch, loading, screenWidth, setScreenWidth }}
     >
-      <>{children}</>
+      <TimerContext.Provider
+        value={{ isPaused, setPause, duration, setDuration }}
+      >
+        <>{children}</>
+      </TimerContext.Provider>
     </AuthContext.Provider>
   );
 };

@@ -52,7 +52,7 @@ const useLogin = () => {
         if (e.message === "net::ERR_INTERNET_DISCONNECTED") {
           // Handle the internet disconnected error
           setError("Internet disconnected");
-        } else if (e.response.status === 401) {
+        } else if (e.response && e.response.status === 401) {
           setError(e.response.data.message);
         } else {
           // Handle other errors

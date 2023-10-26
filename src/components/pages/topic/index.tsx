@@ -11,6 +11,7 @@ import Divider from "../../divider";
 import Chip from "../../chip";
 import useTopic from "../../../hooks/useTopic";
 import ToastNotification from "../../toast";
+import DashboardLayout from "../../dashboadLayout";
 
 const Topic = () => {
   const initV = {
@@ -107,126 +108,134 @@ const Topic = () => {
   };
 
   return (
-    <div>
-      <PageTitleBar>
-        <IDContainerTitle>
-          <p>New set of questions</p>
-        </IDContainerTitle>
-      </PageTitleBar>
+    <DashboardLayout>
+      <div>
+        <PageTitleBar>
+          <IDContainerTitle>
+            <p>New set of questions</p>
+          </IDContainerTitle>
+        </PageTitleBar>
 
-      <div style={{ padding: "1rem" }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(handleOnSubmit);
-          }}
-          style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
-        >
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Name
-            </p>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Input
-                  placeholder="Question"
-                  name={name}
-                  onChange={onChange}
-                  ref={nameRef}
-                />
-              )}
-            />
-            {errors.name && <ErrorFormMessage message={errors.name.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Type
-            </p>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Select name={name} onChange={onChange}>
-                  <option value={`mcq`}>MCQ</option>
-                  {/* <option value={`question_answer`}>Question Answer</option> */}
-                </Select>
-              )}
-            />
-            {errors.type && <ErrorFormMessage message={errors.type.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Tags
-            </p>
-
-            <Input
-              placeholder="tags"
-              ref={tagRef}
-              onKeyDown={(e: any) => addTags(e)}
-            />
-            <div
-              style={{
-                display: "flex",
-                columnGap: "0.5rem",
-                rowGap: "0.5rem",
-                marginTop: "0.5rem",
-              }}
-            >
-              {tags.map((tag: any, index: number) => {
-                return (
-                  <Chip
-                    key={index}
-                    label={tag?.text}
-                    onDelete={() => removeTags(tag.index)}
+        <div style={{ padding: "1rem" }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit(handleOnSubmit);
+            }}
+            style={{ display: "flex", flexDirection: "column", rowGap: "1rem" }}
+          >
+            <div>
+              <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+                Name
+              </p>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    placeholder="Question"
+                    name={name}
+                    onChange={onChange}
+                    ref={nameRef}
                   />
-                );
-              })}
-            </div>
-            {errors.tags && <ErrorFormMessage message={errors.tags.message} />}
-          </div>
-          <div>
-            <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
-              Description
-            </p>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field: { onChange, name } }) => (
-                <Input
-                  placeholder="description"
-                  name={name}
-                  onChange={onChange}
-                  ref={descriptionRef}
-                />
+                )}
+              />
+              {errors.name && (
+                <ErrorFormMessage message={errors.name.message} />
               )}
-            />
-            {errors.description && (
-              <ErrorFormMessage message={errors.description.message} />
-            )}
-          </div>
-          <div>
-            <Divider />
-            <div
-              style={{
-                width: "500px",
-                minWidth: "320px",
-                margin: "0 auto",
-                display: "flex",
-                justifyContent: "center",
-                columnGap: "0.5rem",
-                marginTop: "2rem",
-              }}
-            >
-              <Button $primary type="submit">
-                Save
-              </Button>
             </div>
-          </div>
-        </form>
+            <div>
+              <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+                Type
+              </p>
+              <Controller
+                name="type"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Select name={name} onChange={onChange}>
+                    <option value={`mcq`}>MCQ</option>
+                    {/* <option value={`question_answer`}>Question Answer</option> */}
+                  </Select>
+                )}
+              />
+              {errors.type && (
+                <ErrorFormMessage message={errors.type.message} />
+              )}
+            </div>
+            <div>
+              <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+                Tags
+              </p>
+
+              <Input
+                placeholder="tags"
+                ref={tagRef}
+                onKeyDown={(e: any) => addTags(e)}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  columnGap: "0.5rem",
+                  rowGap: "0.5rem",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {tags.map((tag: any, index: number) => {
+                  return (
+                    <Chip
+                      key={index}
+                      label={tag?.text}
+                      onDelete={() => removeTags(tag.index)}
+                    />
+                  );
+                })}
+              </div>
+              {errors.tags && (
+                <ErrorFormMessage message={errors.tags.message} />
+              )}
+            </div>
+            <div>
+              <p style={{ color: "rgb(101, 109, 118)", fontSize: "1.5rem" }}>
+                Description
+              </p>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field: { onChange, name } }) => (
+                  <Input
+                    placeholder="description"
+                    name={name}
+                    onChange={onChange}
+                    ref={descriptionRef}
+                  />
+                )}
+              />
+              {errors.description && (
+                <ErrorFormMessage message={errors.description.message} />
+              )}
+            </div>
+            <div>
+              <Divider />
+              <div
+                style={{
+                  width: "500px",
+                  minWidth: "320px",
+                  margin: "0 auto",
+                  display: "flex",
+                  justifyContent: "center",
+                  columnGap: "0.5rem",
+                  marginTop: "2rem",
+                }}
+              >
+                <Button $primary type="submit">
+                  Save
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

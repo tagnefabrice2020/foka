@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import QuizPageHeader from "../../../quizPageHeader";
 import { Input } from "../../../input";
 import {
+  Alert,
   Box,
   Collapse,
   Divider,
@@ -51,6 +52,7 @@ const QuestionList = ({ uuid }: any) => {
 
   const [data, setData] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [reload, setReload] = useState<boolean>(false);
 
   const loadData = () => {
     setQuestions([]);
@@ -61,6 +63,7 @@ const QuestionList = ({ uuid }: any) => {
         setQuestions(data.data);
         setTotalQuestionPages(data.last_page);
         setLoading(false);
+        setReload(false);
       })
       .catch((e) => {
         console.log(e);
@@ -71,7 +74,7 @@ const QuestionList = ({ uuid }: any) => {
   useEffect(() => {
     setLoading(true);
     setMounted(true);
-  }, [uuid, questionPage]);
+  }, [uuid, questionPage, reload]);
 
   useEffect(() => {
     if (mounted && loading) loadData();
@@ -119,7 +122,7 @@ const QuestionList = ({ uuid }: any) => {
                 </TableHead>
                 <TableBody>
                   {questions.map((row, idx) => (
-                    <Row key={idx} row={row} />
+                    <Row key={idx} row={row} uuid={uuid} setReload={setReload} />
                   ))}
                 </TableBody>
               </Table>
@@ -155,13 +158,20 @@ function createData({ uuid, question, tags, created_at, options }: Question) {
   };
 }
 
-function Row(props: { row: ReturnType<typeof createData> }) {
-  const { row } = props;
-  const [open, setOpen] = useState(false);
+type RowProps = {
+  row: ReturnType<typeof createData>;
+  uuid: string
+};
+
+function Row(props: { row: ReturnType<typeof createData>, uuid: string, setReload: Dispatch<SetStateAction<boolean>>}, ) {
+  const { row, uuid, setReload } = props;
+  const [open, setOpen] = useState(false); 
   const [openModal, setOpenModal] = useState(false);
   const [openQuestionModal, setOpenQuestionModal] = useState(false);
   const [selectOptionUuid, setSelectedOptionUuid] = useState<string>("");
   const [selectedQuestionUuid, setSelectedQuestionUuid] = useState<string>("");
+
+  const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
   return (
     <>
@@ -191,7 +201,12 @@ function Row(props: { row: ReturnType<typeof createData> }) {
             >
               <i className="bi bi-pencil" style={{ fontSize: "0.7rem" }}></i>
             </IconButton>
-            <IconButton>
+            <IconButton
+              onClick={() => {
+                setOpenDeleteModal(true);
+                setSelectedQuestionUuid(row.uuid);
+              }}
+            >
               <i className="bi bi-trash" style={{ fontSize: "0.7rem" }}></i>
             </IconButton>
           </Box>
@@ -285,7 +300,106 @@ function Row(props: { row: ReturnType<typeof createData> }) {
           setSelectedOption={setSelectedQuestionUuid}
         />
       )}
+      {openDeleteModal && (
+        <DeleteQuestionModal
+          openModal={openDeleteModal}
+          setOpenModal={setOpenDeleteModal}
+          uuid={selectedQuestionUuid}
+          setSelectedQuestion={setSelectedQuestionUuid}
+          topicUuid={uuid}
+          setReload={setReload}
+        />
+      )}
     </>
+  );
+}
+
+function DeleteQuestionModal({
+  uuid,
+  openModal,
+  setOpenModal,
+  setSelectedQuestion,
+  topicUuid,
+  setReload,
+}: {
+  uuid: string;
+  openModal: boolean;
+  setOpenModal: Dispatch<SetStateAction<boolean>>;
+  setSelectedQuestion: Dispatch<SetStateAction<string>>;
+  setReload: Dispatch<SetStateAction<boolean>>;
+  topicUuid: string;
+}) {
+  const handleClose = () => {
+    setOpenModal(false);
+    setSelectedQuestion("");
+  };
+
+  const { DeleteQuestion, getQuestionList } = useQuestion();
+  const { questionPage } = usePageContext();
+
+  const handleDelete = async () => {
+    const res = await DeleteQuestion(uuid);
+    if (res) {
+      
+      // if (res) {
+        setOpenModal(false);
+        setReload(true);
+      // }
+    }
+  };
+
+  return (
+    <div>
+      <Modal
+        open={openModal}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{ maxWidth: "50rem", background: "#fff", margin: "5rem auto" }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: 2,
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              Delete Question
+            </Typography>
+            <i className="bi bi-x-lg cursor-pointer" onClick={handleClose}></i>
+          </Box>
+          <Divider />
+          <Box>
+            <Alert severity="warning">
+              <Typography variant="caption">
+                Are you sure you want to delete this question?
+              </Typography>
+            </Alert>
+          </Box>
+          <Divider />
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "end",
+              columnGap: "0.4rem",
+              p: 2,
+            }}
+          >
+            <Button onClick={handleClose}>
+              <Typography>Close</Typography>
+            </Button>
+            <Button onClick={handleDelete}>
+              <Typography>Delete</Typography>
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </div>
   );
 }
 

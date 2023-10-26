@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { usePageContext } from "../../hooks/usePageContext";
+import { Typography } from "@mui/material";
 
 type Props = {
   questionType?: string;
@@ -14,13 +15,15 @@ const QuizPageHeader = ({
   questionTopic = "Quiz",
   questionNumber,
 }: Props) => {
-  const { setPage, selectedTopic } = usePageContext();
+  const { selectedTopic } = usePageContext();
   return (
     <>
       <PageTitleBar>
         {questionNumber && (
           <IDContainer>
-            <p>{questionNumber}</p>
+            <Typography fontWeight={`bold`} variant="caption">
+              {questionNumber}
+            </Typography>
           </IDContainer>
         )}
         <IDContainerTitle
@@ -28,24 +31,17 @@ const QuizPageHeader = ({
             padding: !questionNumber ? "0.2rem 1rem" : 0,
           }}
         >
-          <p>{questionTopic}</p>
+          <Typography variant="caption">{questionTopic}</Typography>
         </IDContainerTitle>
       </PageTitleBar>
       <PageMenuContainer>
         <PageMenu>
           <QuestionType>
-            <p>{questionType}</p>
+            <Typography variant="caption">{questionType}</Typography>
           </QuestionType>
-          <ActionsContainer>
-            <Action onClick={() => setPage("questionList")}>
-              <p>Questions</p>
-            </Action>
-            <Action onClick={() => setPage("addQuestion")}>
-              <i className="bi bi-plus"></i>
-            </Action>
-          </ActionsContainer>
+
           <QuestionBankTextContainer>
-            <p>Question Bank</p>
+            <Typography variant="caption">Question Bank</Typography>
           </QuestionBankTextContainer>
         </PageMenu>
         {/* form */}
@@ -82,7 +78,6 @@ const PageMenuContainer = styled.div`
   height: 40px;
   display: inline-block;
   width: 100%;
-  overflow: scroll;
 `;
 
 const PageMenu = styled.div`

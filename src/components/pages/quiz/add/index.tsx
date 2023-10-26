@@ -318,7 +318,7 @@ const AddQuestion: React.FC = ({uuid}: any): any => {
                             }
                             onChange={(e: ChangeEvent<HTMLInputElement>) => {
                               console.log(
-                                options.filter((a) => a.isAnswer === true)
+                                options.filter((a: any) => a.isAnswer === true)
                               );
                               const newOptions = options.map(
                                 (a: AnswerOption, index: number) => {
