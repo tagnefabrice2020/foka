@@ -1,56 +1,46 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Layout from "../../components/layout";
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
+} from "@mui/material";
 import Timer from "../../components/timer";
+import { axiosAuthInstance } from "../../settings/axiosSetting";
+import {
+  ScoreContext,
+  TimerContext,
+  QuestionContext,
+} from "../../context/TimerContext";
+import Layout2 from "../../components/layout2";
+import { useQuestionContext } from "../../hooks/useQuestionContext";
+import { graphql } from "gatsby";
+import Exercise from "../../components/pages/exercise";
 
-const Exercise = () => {
+const ExercisePage = (props: any) => {
   return (
-    <Layout>
-      <main
-        style={{
-          marginTop: "calc(0vh + 51px)",
-          // minHeight: "calc(100vh - 51px)",
-        }}
-      >
-        <Box sx={{}}>
-          <Box>
-            <Typography variant="h4"></Typography>
-          </Box>
-          <Box sx={{ display: "flex" }}>
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Box>
-                <Box
-                  sx={{
-                    margin: "0 auto",
-                    maxWidth: "64.8rem",
-                    padding: "1.6rem 2.4rem",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    border: "1px solid #d1d7dc",
-                  }}
-                >
-                  <Typography>
-                    {1}/{20}
-                  </Typography>
-
-                  <Box sx={{}}>
-                    <Timer questionLength={20} />
-                  </Box>
-                </Box>
-                          </Box>
-                          <Box>
-                              
-                          </Box>
-            </Box>
-                      <Box>
-                          indicators
-            </Box>
-          </Box>
-        </Box>
-      </main>
-    </Layout>
+    <Layout2>
+      <Exercise uuid={props["*"]} />
+    </Layout2>
   );
 };
 
-export default Exercise;
+export default ExercisePage;
+
+export const query = graphql`
+  query ($language: String!) {
+    locales: allLocale(filter: { language: { eq: $language } }) {
+      edges {
+        node {
+          ns
+          data
+          language
+        }
+      }
+    }
+  }
+`;

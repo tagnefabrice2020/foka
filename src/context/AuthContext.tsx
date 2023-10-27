@@ -9,7 +9,8 @@ import React, {
 } from "react";
 import { useIsAuth } from "../hooks/useIsAuth";
 import { axiosAuthInstance } from "../settings/axiosSetting";
-import { TimerContext } from "./TimerContext";
+import { QuestionContext, ScoreContext, TimerContext } from "./TimerContext";
+import Question from "../components/pages/quiz";
 
 type UserType = {
   country_id: number | null | undefined;
@@ -175,11 +176,15 @@ export const AuthContextProvider: FC<Props> = ({ children }) => {
     return () => setMounted(false);
   }, [mounted]);
 
-
   const [isPaused, setPause] = useState<boolean>(false);
-  const [duration, setDuration] = useState<number>(
-    1.5 * 20 * 60 * 1000
-  );
+  const [duration, setDuration] = useState<number>(1.5 * 20 * 60 * 1000);
+
+  const [showScore, setShowScore] = useState<boolean>(false);
+   const [questions, setQuestions] = useState<any[]>(["hgfh"]);
+   const [subjectName, setSubjectName] = useState<string>("");
+   const [examName, setExamName] = useState<string>("");
+
+  const [answers, setAnswers] = useState<any[]>([]);
 
   return (
     <AuthContext.Provider
@@ -188,7 +193,22 @@ export const AuthContextProvider: FC<Props> = ({ children }) => {
       <TimerContext.Provider
         value={{ isPaused, setPause, duration, setDuration }}
       >
-        <>{children}</>
+        <QuestionContext.Provider
+          value={{
+            questions,
+            setQuestions,
+            subjectName,
+            setSubjectName,
+            examName,
+            setExamName,
+            answers,
+            setAnswers,
+          }}
+        >
+          <ScoreContext.Provider value={{ showScore, setShowScore }}>
+            <>{children}</>
+          </ScoreContext.Provider>
+        </QuestionContext.Provider>
       </TimerContext.Provider>
     </AuthContext.Provider>
   );

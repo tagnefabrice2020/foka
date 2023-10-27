@@ -37,9 +37,9 @@ const Timer = ({ questionLength }: QuestionLengthType) => {
     let minutes = totalMinutes % 60;
     let hours = totalHours % 60;
 
-    console.log(
-      `${hours} : ${("0" + minutes).slice(-2)} : ${("0" + seconds).slice(-2)}`
-    );
+    // console.log(
+    //   `${hours} : ${("0" + minutes).slice(-2)} : ${("0" + seconds).slice(-2)}`
+    // );
 
     return `${hours} : ${("0" + minutes).slice(-2)} : ${("0" + seconds).slice(
       -2
