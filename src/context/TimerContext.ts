@@ -2,7 +2,7 @@ import React, { createContext } from "react";
 
 export type Options = {
   isAnswer: boolean;
-  option: string;
+  option: string | string[];
 };
 
 export type TimerType = {
@@ -13,15 +13,16 @@ export type TimerType = {
 };
 
 export type QuestionType = {
-  docId: string;
+  id: string;
   question: string;
   options: Options[];
   isCorrect?: boolean;
+  multiple_answers: number;
 };
 
 export type AnswerType = {
-  docId: string;
-  optionIndex: number;
+  question_id: string;
+  option_id: number;
 };
 
 export type QuestionResultType = {

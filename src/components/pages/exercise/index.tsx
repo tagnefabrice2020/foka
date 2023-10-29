@@ -7,13 +7,14 @@ import {
   RadioGroup,
   Typography,
 } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useState } from "react";
 import Timer from "../../timer";
 import { axiosAuthInstance } from "../../../settings/axiosSetting";
 import { useQuestionContext } from "../../../hooks/useQuestionContext";
 import { useTimerContext } from "../../../hooks/useTimerContext";
 import { useScoreContext } from "../../../hooks/useScoreContext";
 import { Button } from "../../button";
+import { Input } from "../../input";
 
 const Exercise = ({ uuid }: { uuid: string }) => {
   const {
@@ -33,9 +34,9 @@ const Exercise = ({ uuid }: { uuid: string }) => {
   const [topic, setTopic] = useState<any>(null);
 
   const checkChoosenAnswer = (docId: string, optionIndex: number) => {
-    const index = answers.findIndex((answer) => answer.docId === docId);
+    const index = answers.findIndex((answer) => answer.question_id === docId);
     if (index > -1) {
-      if (optionIndex === answers[index].optionIndex) return true;
+      if (optionIndex === answers[index].option_id) return true;
       return false;
     }
     return false;
@@ -55,7 +56,7 @@ const Exercise = ({ uuid }: { uuid: string }) => {
   useEffect(() => {
     axiosAuthInstance
       .get(`/topics/${uuid}/`)
-        .then((res) => {
+      .then((res) => {
         setTopic(res.data);
       })
       .catch((error) => {})
@@ -63,6 +64,7 @@ const Exercise = ({ uuid }: { uuid: string }) => {
   }, []);
 
   useEffect(() => console.log(questions, loading), [loading, questions.length]);
+
   return (
     <main
       style={{
@@ -113,7 +115,7 @@ const Exercise = ({ uuid }: { uuid: string }) => {
                       maxWidth: "64.8rem",
                       padding: "0 2.4rem",
                       display: "flex",
-                      justifyContent: "center",
+                      justifyContent: "start",
                       alignItems: "center",
                       flexDirection: "column",
                       border: "1px solid #d1d7dc",
@@ -145,76 +147,131 @@ const Exercise = ({ uuid }: { uuid: string }) => {
                         ></Typography>
                       </Box>
                       <br />
+
                       <Divider />
                       <br />
                       <Box>
-                        <FormControl fullWidth>
-                          <RadioGroup
-                            name={`question-options${currentQuestionIndex}`}
-                          >
-                            {questions[currentQuestionIndex]?.options.map(
-                              (option: any, idx: number) => (
-                                <Box
-                                  display={"flex"}
-                                  alignItems={"center"}
-                                  rowGap={"4px"}
-                                  columnGap={"3px"}
-                                  mt={"4px"}
-                                  border={"1px solid #333"}
-                                  pl={1}
-                                  key={idx}
-                                >
-                                  <FormControlLabel
-                                    value={idx}
-                                    control={
-                                      <Radio
-                                        onChange={(
-                                          event: React.ChangeEvent<HTMLInputElement>,
-                                          checked: boolean
-                                        ) => {
-                                          event.target.checked = checked;
-                                          let answer = {
-                                            docId:
-                                              questions[currentQuestionIndex]
-                                                .docId,
-                                            optionIndex: idx,
-                                          };
-                                          if (answers.length === 0) {
-                                            setAnswers([...answers, answer]);
-                                          } else {
-                                            let checkAnswerIndex =
-                                              answers.findIndex(
-                                                (answer, idx) =>
-                                                  answer.docId ===
-                                                  questions[
-                                                    currentQuestionIndex
-                                                  ].docId
-                                              );
-                                            if (checkAnswerIndex < 0) {
+                        {questions[currentQuestionIndex].multiple_answers ===
+                          0 && (
+                          <FormControl fullWidth>
+                            <RadioGroup
+                              name={`question-options${currentQuestionIndex}`}
+                            >
+                              {questions[currentQuestionIndex]?.options.map(
+                                (option: any, idx: number) => (
+                                  <Box
+                                    display={"flex"}
+                                    alignItems={"center"}
+                                    rowGap={"4px"}
+                                    columnGap={"3px"}
+                                    mt={"4px"}
+                                    border={"1px solid #333"}
+                                    pl={1}
+                                    key={idx}
+                                  >
+                                    <FormControlLabel
+                                      value={idx}
+                                      control={
+                                        <Radio
+                                          onChange={(
+                                            event: ChangeEvent<HTMLInputElement>,
+                                            checked: boolean
+                                          ) => {
+                                            event.target.checked = checked;
+                                            let answer = {
+                                              question_id:
+                                                questions[currentQuestionIndex]
+                                                  .id,
+                                              option_id: option.id,
+                                            };
+                                            if (answers.length === 0) {
                                               setAnswers([...answers, answer]);
                                             } else {
-                                              answers.splice(
-                                                checkAnswerIndex,
-                                                1
-                                              );
-                                              setAnswers([...answers, answer]);
+                                              let checkAnswerIndex =
+                                                answers.findIndex(
+                                                  (answer, idx) =>
+                                                    answer.question_id ===
+                                                    questions[
+                                                      currentQuestionIndex
+                                                    ].id
+                                                );
+                                              if (checkAnswerIndex < 0) {
+                                                setAnswers([
+                                                  ...answers,
+                                                  answer,
+                                                ]);
+                                              } else {
+                                                answers.splice(
+                                                  checkAnswerIndex,
+                                                  1
+                                                );
+                                                setAnswers([
+                                                  ...answers,
+                                                  answer,
+                                                ]);
+                                              }
                                             }
-                                          }
-                                        }}
-                                        checked={checkChoosenAnswer(
-                                          questions[currentQuestionIndex].docId,
-                                          idx
-                                        )}
-                                        disabled={duration <= 0 || isPaused}
-                                      />
+                                          }}
+                                          checked={checkChoosenAnswer(
+                                            questions[currentQuestionIndex].id,
+                                            option.id
+                                          )}
+                                          disabled={duration <= 0 || isPaused}
+                                        />
+                                      }
+                                      label={option?.option_text}
+                                    />
+                                  </Box>
+                                )
+                              )}
+                            </RadioGroup>
+                          </FormControl>
+                        )}
+                        {questions[currentQuestionIndex].multiple_answers ===
+                          1 && (
+                          <Box>
+                            <Input
+                            //   defaultChecked={options[idx].isAnswer}
+                              style={{ width: "fit-content" }}
+                              type={`checkbox`}
+                              disabled={duration <= 0 || isPaused}
+        
+                              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                console.log(
+                                  options.filter(
+                                    (a: any) => a.isAnswer === true
+                                  )
+                                );
+                                const newOptions = options.map(
+                                  (a: AnswerOption, index: number) => {
+                                    if (!multipleAnswer) {
+                                      console.log("single");
+                                      if (index === idx) {
+                                        onChange(e.target.checked);
+                                        return { ...a, isAnswer: true };
+                                      } else {
+                                        return { ...a, isAnswer: false };
+                                      }
+                                    } else {
+                                      if (index === idx) {
+                                        onChange(e.target.checked);
+                                        const { isAnswer } = a;
+
+                                        return {
+                                          ...a,
+                                          isAnswer: !isAnswer ? false : true,
+                                        };
+                                      } else {
+                                        return { ...a };
+                                      }
                                     }
-                                    label={option?.option_text}
-                                  />
-                                </Box>
-                              )
-                            )}
-                          </RadioGroup>
-                        </FormControl>
+                                  }
+                                );
+                              }}
+                              className="checkBoxRadio"
+                            />
+                          </Box>
+                        )}
                       </Box>
                     </Box>
                     <Divider />
@@ -265,8 +322,8 @@ const Exercise = ({ uuid }: { uuid: string }) => {
                               background:
                                 answers.some(
                                   (answer) =>
-                                    answer.docId ===
-                                    questions[currentQuestionIndex].docId
+                                    answer.question_id ===
+                                    questions[currentQuestionIndex].id
                                 ) === true
                                   ? "#23A455"
                                   : "#19743c",
@@ -292,8 +349,8 @@ const Exercise = ({ uuid }: { uuid: string }) => {
                             <Typography fontWeight={`700`}>
                               {answers.some(
                                 (answer) =>
-                                  answer.docId ===
-                                  questions[currentQuestionIndex].docId
+                                  answer.question_id ===
+                                  questions[currentQuestionIndex].id
                               ) === true
                                 ? "Next"
                                 : "Skip Question"}

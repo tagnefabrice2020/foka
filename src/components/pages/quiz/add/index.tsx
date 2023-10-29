@@ -25,8 +25,7 @@ import useQuestion from "../../../../hooks/useQuestion";
 import { Chip, Typography } from "@mui/material";
 import DashboardLayout from "../../../dashboadLayout";
 
-const AddQuestion: React.FC = ({uuid}: any): any => {
- 
+const AddQuestion: React.FC = ({ uuid }: any): any => {
   const { selectedTopic } = usePageContext();
   const { createQuestion } = useQuestion();
   const initialValues = {
@@ -59,20 +58,16 @@ const AddQuestion: React.FC = ({uuid}: any): any => {
 
   const handleOnSubmit = async (formData: QuestionType) => {
     // Destructure the 'topic' property from formData
-    const { topic, ...rest } = formData;
+   
     let action;
     // Check if 'topic' is null or undefined
-    if (topic == null) {
-      (rest as QuestionType).topic = selectedTopic?.id;
-      // Pass 'rest' as the parameter to createQuestion
-      action = await createQuestion(rest as QuestionType);
-    } else {
-      // Pass 'formData' as the parameter to createQuestion
-      action = await createQuestion(formData);
-    }
+
+    (formData as QuestionType).topic = uuid;
+    console.log(formData);
+    // Pass 'rest' as the parameter to createQuestion
+    action = await createQuestion(formData as QuestionType);
 
     if (action) {
-      
       reset();
       setTags([]);
     }

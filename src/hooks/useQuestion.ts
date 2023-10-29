@@ -16,9 +16,12 @@ const useQuestion = () => {
     tags,
     options,
     topic,
+    multipleAnswer,
+    correctFeedBack,
+    inCorrectFeedBack
   }: QuestionType): Promise<boolean> => {
     setIspending(true);
-    const data = { question, tags, options, topic };
+    const data = { question, tags, options, topic, multipleAnswer, correctFeedBack, inCorrectFeedBack };
     return axiosAuthInstance
       .post(`${API_URL.questions}`, data)
       .then((response) => {
